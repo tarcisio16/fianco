@@ -11,39 +11,32 @@ class Chessboard:
     CAPTURE_PATTERNS_BLACK = [(-2, 2), (-2, -2)] # Diagonal captures
     
     def __init__(self):
-        self.board = np.zeros((BOARD_SIZE, BOARD_SIZE), dtype=int)
+        self.board = np.zeros((BOARD_SIZE, BOARD_SIZE), dtype=np.int8)
         self.initialize_pieces()
         self.player = 1
         self.legal_moves = set()
         self.capture = False
         self.table = init_table()
-        self.previous = deque()
-        self.previous_capture = deque()
+        self.previous = deque(maxlen=MAX_HISTORY)
+        self.previous_capture = deque(maxlen=MAX_HISTORY)
 
     def initialize_pieces(self):
         self.board[0, :] = WHITE_PIECE
-        self.board[1, 1] = WHITE_PIECE
-        self.board[1, 7] = WHITE_PIECE
-        self.board[2, 2] = WHITE_PIECE
-        self.board[2, 6] = WHITE_PIECE
-        self.board[3, 3] = WHITE_PIECE
-        self.board[3, 5] = WHITE_PIECE
+        self.board[1, [1, 7]] = WHITE_PIECE  
+        self.board[2, [2, 6]] = WHITE_PIECE
+        self.board[3, [3, 5]] = WHITE_PIECE
         self.board[8, :] = BLACK_PIECE
-        self.board[7, 1] = BLACK_PIECE
-        self.board[7, 7] = BLACK_PIECE
-        self.board[6, 2] = BLACK_PIECE
-        self.board[6, 6] = BLACK_PIECE
-        self.board[5, 3] = BLACK_PIECE
-        self.board[5, 5] = BLACK_PIECE
-        self.pl1 = set([(0,0),(0,1),(0,2),(0,3),(0,4),(0,5),(0,6),(0,7),(0,8),(1,1),(1,7),(2,2),(2,6),(3,3),(3,5)])
-        self.pl2 = set([(8,0),(8,1),(8,2),(8,3),(8,4),(8,5),(8,6),(8,7),(8,8),(7,1),(7,7),(6,2),(6,6),(5,3),(5,5)])
+        self.board[7, [1, 7]] = BLACK_PIECE
+        self.board[6, [2, 6]] = BLACK_PIECE
+        self.board[5, [3, 5]] = BLACK_PIECE
+        self.pl1 = set([(0, i) for i in range(9)] + [(1, 1), (1, 7), (2, 2), (2, 6), (3, 3), (3, 5)])
+        self.pl2 = set([(8, i) for i in range(9)] + [(7, 1), (7, 7), (6, 2), (6, 6), (5, 3), (5, 5)])
 
     def move(self, player, movefrom, moveto):
         y0, x0, y1, x1 = movefrom[0], movefrom[1], moveto[0], moveto[1]      
         self.legalmoves()
 
-        move = (y0, x0, y1, x1)
-        if move in self.legal_moves:
+        if (y0, x0, y1, x1) in self.legal_moves:
             self.previous.append((y0, x0, y1, x1))
             if self.capture:
                 mid_y = (y0+y1) // 2
@@ -68,6 +61,8 @@ class Chessboard:
                 self.pl2.add((y1, x1))
 
             self.player = 3 - self.player
+
+            self.tocalculate = True
 
     def undo(self):
         if self.previous:

@@ -18,3 +18,5 @@ LETTERS = "ABCDEFGHI"
 
 WHITE_PIECE = 1
 BLACK_PIECE = 2
+
+MAX_HISTORY = 10   # Maximum number of moves to store in history
