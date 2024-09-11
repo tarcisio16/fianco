@@ -87,6 +87,7 @@ def handle_input():
     if keys[pygame.K_BACKSPACE]:  # Restart the game on Backspace
         reset_game()
         return
+        
 
     if selected_piece:
         move_directions = {
@@ -106,6 +107,11 @@ while True:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_BACKSPACE:
+                        reset_game()
+                    if event.key == pygame.K_u:
+                        chessboard.undo()
                 elif event.type == pygame.MOUSEBUTTONDOWN and not game_over:
                     pos = pygame.mouse.get_pos()
                     cell = get_cell_at_position(pos)

@@ -1,6 +1,7 @@
 import numpy as np
 from utils import init_table, compute_hash
 from parameters import *
+from collections import deque
 
 class Chessboard:
     # Movement and capture patterns
@@ -16,6 +17,8 @@ class Chessboard:
         self.legal_moves = set()
         self.capture = False
         self.table = init_table()
+        self.previous = deque()
+        self.previous_capture = deque()
 
     def initialize_pieces(self):
         self.board[0, :] = WHITE_PIECE
@@ -35,33 +38,68 @@ class Chessboard:
         self.pl1 = set([(0,0),(0,1),(0,2),(0,3),(0,4),(0,5),(0,6),(0,7),(0,8),(1,1),(1,7),(2,2),(2,6),(3,3),(3,5)])
         self.pl2 = set([(8,0),(8,1),(8,2),(8,3),(8,4),(8,5),(8,6),(8,7),(8,8),(7,1),(7,7),(6,2),(6,6),(5,3),(5,5)])
 
-    def move(self, player, movefrom, moveto):      
+    def move(self, player, movefrom, moveto):
+        y0, x0, y1, x1 = movefrom[0], movefrom[1], moveto[0], moveto[1]      
         self.legalmoves()
 
-        move = (movefrom[0], movefrom[1], moveto[0], moveto[1])
+        move = (y0, x0, y1, x1)
         if move in self.legal_moves:
+            self.previous.append((y0, x0, y1, x1))
             if self.capture:
-                mid_y = (movefrom[0] + moveto[0]) // 2
-                mid_x = (movefrom[1] + moveto[1]) // 2
+                mid_y = (y0+y1) // 2
+                mid_x = (x0+x1) // 2
+                self.previous_capture.append((mid_y, mid_x))
                 self.board[mid_y, mid_x] = 0
                 if player == 1:
                     self.pl2.remove((mid_y, mid_x))
                 else:
                     self.pl1.remove((mid_y, mid_x))
                 self.capture = False
-
-            self.board[moveto[0], moveto[1]] = player
-            self.board[movefrom[0], movefrom[1]] = 0
+            else:
+                self.previous_capture.append((-1, -1))
+            self.board[y1, x1] = player
+            self.board[y0, x0] = 0
 
             if player == 1:
-                self.pl1.remove((movefrom[0], movefrom[1]))
-                self.pl1.add((moveto[0], moveto[1]))
+                self.pl1.remove((y0, x0))
+                self.pl1.add((y1, x1))
             else:
-                self.pl2.remove((movefrom[0], movefrom[1]))
-                self.pl2.add((moveto[0], moveto[1]))
+                self.pl2.remove((y0, x0))
+                self.pl2.add((y1, x1))
 
             self.player = 3 - self.player
 
+    def undo(self):
+        if self.previous:
+            # Retrieve the last move
+            y0, x0, y1, x1 = self.previous.pop()
+            mid_y, mid_x = self.previous_capture.pop()
+            
+            # Move the piece back to its original position
+            self.board[y0, x0] = self.board[y1, x1]
+            self.board[y1, x1] = 0  # Clear the position where the piece moved
+            
+            # Handle the captured piece restoration
+            if mid_y != -1:  # If there was a capture
+                # Restore the captured piece
+                self.board[mid_y, mid_x] = 3 - self.board[y0, x0]  # Restore opponent's piece
+                
+                # Update piece sets (pl1, pl2)
+                if self.board[mid_y, mid_x] == 1:
+                    self.pl1.add((mid_y, mid_x))  # Restore piece to player 1's set
+                else:
+                    self.pl2.add((mid_y, mid_x))  # Restore piece to player 2's set
+            
+            # Update the current player’s piece set to reflect the move back
+            if self.player == 2:
+                self.pl1.add((y0, x0))
+                self.pl1.discard((y1, x1))  # Remove from the destination
+            else:
+                self.pl2.add((y0, x0))
+                self.pl2.discard((y1, x1))
+            
+            # Switch player back to the one who made the move
+            self.player = 3 - self.player
     def legalmoves(self):
         self.legal_moves.clear()
         capture_moves = set()
