@@ -3,72 +3,56 @@ import sys
 from chessboard import Chessboard
 from fiancoai import FiancoAI
 import time
+from parameters import *
 
 # Initialize pygame and screen dimensions
 pygame.init()
-width, height = 700, 700
-screen = pygame.display.set_mode((width, height))
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("FIANCO")
-
-# Define game colors and dimensions
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-GREY = (200, 200, 200)
-
-TYPE_OF_GAME =  1 # 0: "human VS human" 
-                   # 1: "ai VS ai" 
-                   # 2: "ai vs human"
-DELAY_AI = 0.2
-margin = 70
-grid_size = 500
-cell_size = grid_size // 8
-font_size = 30
-font = pygame.font.SysFont(None, font_size)
+font = pygame.font.SysFont(None, FONT_SIZE)
 
 # Initialize game state
 chessboard = Chessboard()
-player1 = FiancoAI(chessboard,1)
-player2 = FiancoAI(chessboard,2)
+player1,player2 = FiancoAI(chessboard,1), FiancoAI(chessboard,2)
 selected_piece = None
 game_over = False
 
 # Draw the chess grid
 def draw_grid():
-    for x in range(margin, margin + grid_size + 1, cell_size):
-        pygame.draw.line(screen, BLACK, (x, margin), (x, margin + grid_size), 2)
-    for y in range(margin, margin + grid_size + 1, cell_size):
-        pygame.draw.line(screen, BLACK, (margin, y), (margin + grid_size, y), 2)
+    for x in range(MARGIN, MARGIN + GRID_SIZE + 1, CELL_SIZE):
+        pygame.draw.line(screen, BLACK, (x, MARGIN), (x, MARGIN + GRID_SIZE), 2)
+    for y in range(MARGIN, MARGIN + GRID_SIZE + 1, CELL_SIZE):
+        pygame.draw.line(screen, BLACK, (MARGIN, y), (MARGIN + GRID_SIZE, y), 2)
 
 # Draw the labels for grid coordinates and current player
 def draw_labels():
-    letters = "ABCDEFGHI"
     for i in range(9):
-        screen.blit(font.render(letters[i], True, BLACK), (i * cell_size + margin, font_size // 2))
-        screen.blit(font.render(str(i + 1), True, BLACK), (10, margin + i * cell_size))
+        screen.blit(font.render(LETTERS[i], True, BLACK), (i * CELL_SIZE + MARGIN, FONT_SIZE // 2))
+        screen.blit(font.render(str(i + 1), True, BLACK), (10, MARGIN + i * CELL_SIZE))
     
     player_message = f"Player {chessboard.player}'s turn"
-    screen.blit(font.render(player_message, True, BLACK), (width // 2 - font_size, height - font_size - 10))
+    screen.blit(font.render(player_message, True, BLACK), (WIDTH // 2 - FONT_SIZE, HEIGHT - FONT_SIZE - 10))
 
 # Draw player pieces on the grid
 def draw_pieces():
     for white in chessboard.pl1:
-        pygame.draw.circle(screen, WHITE, (white[1] * cell_size + margin, white[0] * cell_size + margin), cell_size // 2 - 10)
+        pygame.draw.circle(screen, WHITE, (white[1] * CELL_SIZE + MARGIN, white[0] * CELL_SIZE + MARGIN), CELL_SIZE // 2 - 10)
     for black in chessboard.pl2:
-        pygame.draw.circle(screen, BLACK, (black[1] * cell_size + margin, black[0] * cell_size + margin), cell_size // 2 - 10)
+        pygame.draw.circle(screen, BLACK, (black[1] * CELL_SIZE + MARGIN, black[0] * CELL_SIZE + MARGIN), CELL_SIZE // 2 - 10)
 
 # Draw legal moves and selected piece highlights
 def draw_moves():
     chessboard.legalmoves()
     if selected_piece:
-        pygame.draw.circle(screen, (255, 0, 0), (selected_piece[1] * cell_size + margin, selected_piece[0] * cell_size + margin), cell_size // 2 - 10)
+        pygame.draw.circle(screen, (255, 0, 0), (selected_piece[1] * CELL_SIZE + MARGIN, selected_piece[0] * CELL_SIZE + MARGIN), CELL_SIZE // 2 - 10)
     for move in chessboard.legal_moves:
-        pygame.draw.circle(screen, (0, 255, 0), (move[3] * cell_size + margin, move[2] * cell_size + margin), cell_size // 2 - 25)
+        pygame.draw.circle(screen, (0, 255, 0), (move[3] * CELL_SIZE + MARGIN, move[2] * CELL_SIZE + MARGIN), CELL_SIZE // 2 - 25)
 
 # Get the grid cell based on mouse position
 def get_cell_at_position(pos):
-    x = round(abs(pos[1] - margin) / cell_size)
-    y = round(abs(pos[0] - margin) / cell_size)
-    if 0 <= x <= 8 and 0 <= y <= 8:
+    x = round(abs(pos[1] - MARGIN) / CELL_SIZE)
+    y = round(abs(pos[0] - MARGIN) / CELL_SIZE)
+    if 0 <= x < BOARD_SIZE and 0 <= y < BOARD_SIZE:
         return (x, y)
     return None
 
@@ -175,6 +159,6 @@ while True:
 
     game_over_message = check_game_over()
     if game_over_message:
-        screen.blit(font.render(game_over_message, True, BLACK), (width // 2 - font_size, height // 2))
+        screen.blit(font.render(game_over_message, True, BLACK), (WIDTH // 2 - FONT_SIZE, HEIGHT // 2))
 
     pygame.display.flip()
