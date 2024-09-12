@@ -32,6 +32,68 @@ class Chessboard:
         self.pl1 = set([(0, i) for i in range(9)] + [(1, 1), (1, 7), (2, 2), (2, 6), (3, 3), (3, 5)])
         self.pl2 = set([(8, i) for i in range(9)] + [(7, 1), (7, 7), (6, 2), (6, 6), (5, 3), (5, 5)])
 
+    def legal_moves_piece(self,  y, x):
+        moves = -np.ones(6, dtype=np.int8)
+
+        # Verifica a chi appartiene il pezzo e definisce le direzioni
+        if self.board[y, x] == 1 and self.player == 1:
+            opponent, forward_step, capture_step = 2, 1, 2
+        elif self.board[y, x] == 2 and self.player == 2:
+            opponent, forward_step, capture_step = 1, -1, -2
+        else:
+            return moves
+
+        # Verifica le catture disponibili
+        if self._check_capture(moves, y, x, opponent, forward_step, capture_step):
+            return moves
+
+        # Se nessuna cattura è disponibile, verifica i movimenti normali
+        self._check_regular_moves(moves, y, x, forward_step)
+
+        return moves
+
+    def _check_capture(self, moves,  y,  x,  opponent, forward_step,  capture_step):
+        """ Controlla e aggiunge eventuali catture alla lista delle mosse. """
+        capture_found = False
+
+        if 0 <= y + capture_step < BOARD_SIZE:
+            # Diagonale destra
+            if (0 <= x + capture_step < BOARD_SIZE and 
+                self.board[y + forward_step, x + 1] == opponent and self.board[y + capture_step, x + capture_step] == 0):
+                moves[0], moves[1] = y + capture_step, x + capture_step
+                capture_found = True
+
+            # Diagonale sinistra
+            if (0 <= x - capture_step < BOARD_SIZE and 
+                self.board[y + forward_step, x - 1] == opponent and self.board[y + capture_step, x - capture_step] == 0):
+                if moves[0] != -1:
+                    moves[2], moves[3] = y + capture_step, x - capture_step
+                else:
+                    moves[0], moves[1] = y + capture_step, x - capture_step
+                capture_found = True
+
+        return capture_found
+
+    def _check_regular_moves(self, moves,  y,  x,  forward_step):
+        """ Controlla e aggiunge i movimenti regolari alla lista delle mosse. """
+        # Movimento avanti
+        if 0 <= y + forward_step < BOARD_SIZE and self.board[y + forward_step, x] == 0:
+            moves[0], moves[1] = y + forward_step, x
+
+        # Movimento laterale destra
+        if 0 <= x + 1 < BOARD_SIZE and self.board[y, x + 1] == 0:
+            if moves[0] != -1:
+                moves[2], moves[3] = y, x + 1
+            else:
+                moves[0], moves[1] = y, x + 1
+
+        # Movimento laterale sinistra
+        if 0 <= x - 1 < BOARD_SIZE and self.board[y, x - 1] == 0:
+            if moves[0] != -1 and moves[2] != -1:
+                moves[4], moves[5] = y, x - 1
+            else:
+                moves[2], moves[3] = y, x - 1 if moves[0] != -1 else y, x - 1
+    
     def move(self, player, movefrom, moveto):
         y0, x0, y1, x1 = movefrom[0], movefrom[1], moveto[0], moveto[1]      
         self.legalmoves()
