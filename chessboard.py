@@ -39,68 +39,11 @@ class Chessboard:
 
         self.player = 1
         self.legal_moves = set(INITIAL_LEGAL_MOVES)
-        self.capture = False
         self.table = init_table()
         self.previous = deque(maxlen=MAX_HISTORY)
 
     def get_bitboard_position(self, y, x):
         return 1 << (y * BOARD_SIZE + x)
-
-    def move_no_check(self, player, move):
-        y0, x0, y1, x1 = move[0], move[1], move[0], move[1]
-        bit_pos_from = self.get_bitboard_position(y0, x0)
-        bit_pos_to = self.get_bitboard_position(y1, x1)
-
-        if player == 1:
-            self.white_pieces = (self.white_pieces & ~bit_pos_from) | bit_pos_to
-        else:
-            self.black_pieces = (self.black_pieces & ~bit_pos_from) | bit_pos_to
-
-        if abs(y1 - y0) == 2:
-            mid_y = (y0 + y1) // 2
-            mid_x = (x0 + x1) // 2
-            mid_pos = self.get_bitboard_position(mid_y, mid_x)
-            if player == 1:
-                self.black_pieces &= ~mid_pos
-            else:
-                self.white_pieces &= ~mid_pos
-            self.empty_squares |= mid_pos
-        else:
-            self.previous_capture.append((-1, -1))
-
-        self.empty_squares |= bit_pos_from
-        self.empty_squares &= ~bit_pos_to
-
-        self.player = 3 - self.player
-
-    def move(self, player, movefrom, moveto):
-        
-        bit_pos_from, bit_pos_to = self.get_bitboard_position(*movefrom), self.get_bitboard_position(*moveto)
-
-        if (y0 := movefrom[0], x0 := movefrom[1], y1 := moveto[0], x1 := moveto[1]) in self.legal_moves:
-            self.previous.append((y0, x0, y1, x1))
-
-            if self.capture:
-                mid_y = (y0 + y1) // 2
-                mid_x = (x0 + x1) // 2
-                mid_pos = self.get_bitboard_position(mid_y, mid_x)
-                
-                if player == 1:
-                    self.black_pieces ^= mid_pos 
-                else:
-                    self.white_pieces ^= mid_pos  
-                    
-                self.empty_squares ^= mid_pos  
-                self.capture = False  
-
-            if player == 1:
-                self.white_pieces ^= (bit_pos_from | bit_pos_to)  
-            else:
-                self.black_pieces ^= (bit_pos_from | bit_pos_to)  
-            self.empty_squares ^= (bit_pos_from | bit_pos_to)  
-
-            self.player ^= 3 
-            self.legalmoves()
 
     def legalmoves(self):
         self.legal_moves.clear()
@@ -138,11 +81,92 @@ class Chessboard:
 
         if capture_moves:
             self.legal_moves = capture_moves
-            self.capture = True
-        else:
-            self.capture = False
 
-        return list(self.legal_moves)
+    def undo(self):
+        if self.previous:
+            self.player ^= 3  # Switch back to the previous player
+
+            # Retrieve the last bitboard differences
+            white_diff, black_diff, empty_diff = self.previous.pop()
+
+            # Apply the bitwise difference to reverse the board state
+            self.white_pieces ^= white_diff
+            self.black_pieces ^= black_diff
+            self.empty_squares ^= empty_diff
+
+            # Update legal moves after undo
+            self.legalmoves()
+
+    def move_no_check(self, player, y0, x0, y1, x1):
+        white_initial, black_initial, empty_initial = self.white_pieces, self.black_pieces, self.empty_squares
+        bit_pos_from, bit_pos_to = self.get_bitboard_position(y0, x0), self.get_bitboard_position(y1, x1)
+        shift = bit_pos_from | bit_pos_to
+
+        if player == 1:
+            self.white_pieces ^= shift
+        else:
+            self.black_pieces ^= shift
+
+        if abs(y1 - y0) == 2:
+            mid_pos = self.get_bitboard_position((y0 + y1) // 2, (x0 + x1) // 2)
+            if player == 1:
+                self.black_pieces &= ~mid_pos
+            else:
+                self.white_pieces &= ~mid_pos
+            self.empty_squares |= mid_pos
+
+        self.empty_squares ^= shift
+        self.previous.append((self.white_pieces ^ white_initial, self.black_pieces ^ black_initial, self.empty_squares ^ empty_initial))
+        self.player ^= 3
+        
+
+    def move(self, player, movefrom, moveto):
+        bit_pos_from = self.get_bitboard_position(*movefrom)
+        bit_pos_to = self.get_bitboard_position(*moveto)
+
+        # Calculate initial state of bitboards before the move
+        white_initial = self.white_pieces
+        black_initial = self.black_pieces
+        empty_initial = self.empty_squares
+
+        # Perform the move (same as before)
+        shift = bit_pos_from | bit_pos_to
+
+        if (y0 := movefrom[0], x0 := movefrom[1], y1 := moveto[0], x1 := moveto[1]) in self.legal_moves:
+            mid_y, mid_x = (y0 + y1) // 2, (x0 + x1) // 2
+            if abs(y1 - y0) == 2:
+                mid_pos = self.get_bitboard_position(mid_y, mid_x)
+
+                if player == 1:
+                    self.black_pieces ^= mid_pos  # Remove black piece
+                else:
+                    self.white_pieces ^= mid_pos  # Remove white piece
+
+                self.empty_squares ^= mid_pos  # Update empty squares
+
+            # Move the piece and update empty squares
+            if player == 1:
+                self.white_pieces ^= shift  # Move white piece
+            else:
+                self.black_pieces ^= shift  # Move black piece
+            self.empty_squares ^= shift  # Update empty squares
+
+            # Save the difference between the initial and final states of the bitboards
+            white_diff = self.white_pieces ^ white_initial
+            black_diff = self.black_pieces ^ black_initial
+            empty_diff = self.empty_squares ^ empty_initial
+
+            # Append the shifts to history for undo
+            self.previous.append((white_diff, black_diff, empty_diff))
+
+            # Switch player
+            self.player ^= 3
+            
+            # Update legal moves
+            self.legalmoves()
+
+    def hash(self):
+        return compute_hash(self.board, self.table, self.player)
 
     def get_piece_positions(self, player):
         bitboard = self.white_pieces if player == 1 else self.black_pieces
@@ -152,28 +176,3 @@ class Chessboard:
                 y, x = divmod(bit, BOARD_SIZE)
                 positions.add((y, x))
         return positions
-
-    def undo(self):
-        if self.previous:
-            self.player = 3 - self.player
-            y0, x0, y1, x1 = self.previous.pop()
-            if abs(y1 - y0) == 2:
-                midx, midy = (x0 + x1) // 2, (y0 + y1) // 2
-                if self.player == 1:
-                    self.black_pieces |= self.get_bitboard_position(midy, midx)
-                else:
-                    self.white_pieces |= self.get_bitboard_position(midy, midx)
-                self.empty_squares &= ~self.get_bitboard_position(midy, midx)
-            bit_pos_from = self.get_bitboard_position(y0, x0)
-            bit_pos_to = self.get_bitboard_position(y1, x1)
-
-            if self.player == 1:
-                self.white_pieces = (self.white_pieces | bit_pos_from) & ~bit_pos_to
-            else:
-                self.black_pieces = (self.black_pieces | bit_pos_from) & ~bit_pos_to
-            self.empty_squares |= bit_pos_to
-            self.empty_squares &= ~bit_pos_from
-
-
-    def hash(self):
-        return compute_hash(self.board, self.table, self.player)

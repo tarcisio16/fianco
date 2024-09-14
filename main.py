@@ -46,6 +46,7 @@ def draw_pieces():
 
 # Draw legal moves and selected piece highlights
 def draw_moves():
+    chessboard.legalmoves()
     legal_moves = chessboard.legal_moves
     if selected_piece:
         pygame.draw.circle(screen, (255, 0, 0), 
@@ -88,7 +89,7 @@ def check_game_over():
 
 # Move a piece from one position to another
 def move_piece(from_pos, to_pos):
-    chessboard.move(chessboard.player, from_pos, to_pos)
+    chessboard.move_no_check(chessboard.player, from_pos[0],from_pos[1],to_pos[0], to_pos[1])
 
 # Handle user input for piece movement and resetting the game
 def handle_input():
