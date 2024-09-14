@@ -1,9 +1,21 @@
 import numpy as np
-from utils import init_table, compute_hash
 from parameters import *
 from collections import deque
+import sys
 
 class Chessboard:
+    """ 
+        Class to represent the state of the chessboard and game logic 
+
+        Attributes:
+        - white_pieces: Bitboard representing the positions of white pieces
+        - black_pieces: Bitboard representing the positions of black pieces
+        - empty_squares: Bitboard representing the empty squares
+        - player: Current player's turn
+        - legal_moves: Set of legal moves for the current player
+        - previous: Deque to store the previous board states for undo functionality
+        
+    """
     # Movement and capture patterns
     MOVEMENT_DIRECTIONS = {
         1: [(1, 0), (0, 1), (0, -1)],  # Player 1: Down, Right, Left
@@ -39,9 +51,8 @@ class Chessboard:
 
         self.player = 1
         self.legal_moves = set(INITIAL_LEGAL_MOVES)
-        self.table = init_table()
         self.previous = deque(maxlen=MAX_HISTORY)
-
+        
     def get_bitboard_position(self, y, x):
         return 1 << (y * BOARD_SIZE + x)
 
@@ -119,7 +130,12 @@ class Chessboard:
         self.previous.append((self.white_pieces ^ white_initial, self.black_pieces ^ black_initial, self.empty_squares ^ empty_initial))
         self.player ^= 3
         
-
+    def check_winner(self):
+        if self.white_pieces & 0x1FF000000:
+            return 1
+        if self.black_pieces & 0x1FF:
+            return 2
+        return 0
     def move(self, player, movefrom, moveto):
         bit_pos_from = self.get_bitboard_position(*movefrom)
         bit_pos_to = self.get_bitboard_position(*moveto)
@@ -176,3 +192,38 @@ class Chessboard:
                 y, x = divmod(bit, BOARD_SIZE)
                 positions.add((y, x))
         return positions
+
+    def display(self):
+        for row in range(BOARD_SIZE):
+            for col in range(BOARD_SIZE):
+                if self.white_pieces & self.get_bitboard_position(row, col):
+                    print("W", end=" ")
+                elif self.black_pieces & self.get_bitboard_position(row, col):
+                    print("B", end=" ")
+                else:
+                    print(".", end=" ")
+            print()
+        print()
+
+    def count_pieces(self, player):
+        if player == 1:
+            bitboard = self.white_pieces
+        elif player == 2:
+            bitboard = self.black_pieces
+        else:
+            raise ValueError("Invalid player number. Use 1 for white or 2 for black.")
+    
+        # Count the number of set bits in the bitboard
+        return bin(bitboard).count('1')
+
+    # def debug_script(self):
+    #     print("white_pieces:", self.white_pieces)
+    #     print("Size of white pieces:", sys.getsizeof(self.white_pieces), "bytes")
+    #     print("Size of black pieces:", sys.getsizeof(self.black_pieces), "bytes")
+    #     print("Dimensione in memoria di blank pieces:",sys.getsizeof(self.empty_squares), "bytes")
+    #     print("dimensione in memoria di un array dei tre bitboard:", sys.getsizeof(np.array([self.white_pieces, self.black_pieces, self.empty_squares])), "bytes")
+    #     print("Dimensione in memoria di player:", self.player.__sizeof__(), "bytes")
+    #     print("legal_moves:", self.legal_moves)
+    #     print("Dimensione in memoria di legal_moves:", self.legal_moves.__sizeof__(), "bytes")
+    #     print("previous:", self.previous)
+    #     print("Dimensione in memoria di previous:", self.previous.__sizeof__(), "bytes")
