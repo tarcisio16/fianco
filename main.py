@@ -10,6 +10,7 @@ pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("FIANCO")
 font = pygame.font.SysFont(None, FONT_SIZE)
+font2 = pygame.font.SysFont(None, FONT_SIZE // 2)
 
 # Initialize game state
 chessboard = Chessboard()
@@ -25,11 +26,13 @@ def draw_grid():
 def draw_labels():
     for i in range(BOARD_SIZE):
         screen.blit(font.render(LETTERS[i], True, BLACK), (i * CELL_SIZE + MARGIN, FONT_SIZE // 2))
-        screen.blit(font.render(str(i + 1), True, BLACK), (10, MARGIN + i * CELL_SIZE))
-    
+        screen.blit(font2.render(str(i + 1), True, BLACK), (10, MARGIN + i * CELL_SIZE))
+
     player_message = f"Player {chessboard.player}'s turn"
     screen.blit(font.render(player_message, True, BLACK), (WIDTH // 2 - FONT_SIZE, HEIGHT - FONT_SIZE - 10))
-
+    
+    memory_text = f"HASH: {bin(chessboard.compute_zobrist_hash())}"
+    screen.blit(font.render(memory_text, True, BLACK), (  10, HEIGHT - 2 * FONT_SIZE - 10))
 def draw_pieces():
     for pos in chessboard.get_piece_positions(1):
         pygame.draw.circle(screen, WHITE, 
@@ -105,14 +108,6 @@ def handle_input():
                 move_piece((y, x), (y + dy, x + dx))
                 break
 
-def process_ai_moves():
-    if chessboard.player == 1:
-        move_from, move_to = player1.get_move()
-    else:
-        move_from, move_to = player2.get_move()
-    if move_from and move_to:
-        chessboard.move(chessboard.player, move_from, move_to)
-
 def main_game_loop():
     global game_over, selected_piece
     
@@ -144,7 +139,7 @@ def main_game_loop():
         draw_labels()
         draw_pieces()
         draw_moves()
-        draw_piece_number()
+        #draw_piece_number()
 
         game_over_message = check_game_over()
         if game_over_message:
