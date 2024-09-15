@@ -10,29 +10,32 @@ pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("FIANCO")
 font = pygame.font.SysFont(None, FONT_SIZE)
-font2 = pygame.font.SysFont(None, FONT_SIZE // 2)
 
 # Initialize game state
 chessboard = Chessboard()
+player1 = FiancoAI(chessboard, 1)
+player2 = FiancoAI(chessboard, 2)
 selected_piece = None
 game_over = False
+delay = 0  # Delay for AI thinking
 
+# Draw the chess grid
 def draw_grid():
     for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):
         pygame.draw.line(screen, BLACK, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)
     for y in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):
         pygame.draw.line(screen, BLACK, (MARGIN, y), (MARGIN + BOARD_SIZE * CELL_SIZE, y), 2)
 
+# Draw the labels for grid coordinates and current player
 def draw_labels():
     for i in range(BOARD_SIZE):
         screen.blit(font.render(LETTERS[i], True, BLACK), (i * CELL_SIZE + MARGIN, FONT_SIZE // 2))
-        screen.blit(font2.render(str(i + 1), True, BLACK), (10, MARGIN + i * CELL_SIZE))
-
+        screen.blit(font.render(str(i + 1), True, BLACK), (10, MARGIN + i * CELL_SIZE))
+    
     player_message = f"Player {chessboard.player}'s turn"
     screen.blit(font.render(player_message, True, BLACK), (WIDTH // 2 - FONT_SIZE, HEIGHT - FONT_SIZE - 10))
-    
-    memory_text = f"HASH: {bin(chessboard.compute_zobrist_hash())}"
-    screen.blit(font.render(memory_text, True, BLACK), (  10, HEIGHT - 2 * FONT_SIZE - 10))
+
+# Draw player pieces on the grid
 def draw_pieces():
     for pos in chessboard.get_piece_positions(1):
         pygame.draw.circle(screen, WHITE, 
@@ -49,6 +52,7 @@ def draw_piece_number():
     screen.blit(font.render(f"White: {white_pieces}", True, BLACK), (WIDTH - 10 * FONT_SIZE, HEIGHT - FONT_SIZE - 10))
     screen.blit(font.render(f"Black: {black_pieces}", True, BLACK), (WIDTH - 10 * FONT_SIZE, HEIGHT - 2 * FONT_SIZE - 10))
 
+# Draw legal moves and selected piece highlights
 def draw_moves():
     chessboard.legalmoves()
     legal_moves = chessboard.legal_moves
@@ -57,10 +61,12 @@ def draw_moves():
                            (selected_piece[1] * CELL_SIZE + MARGIN + CELL_SIZE // 2, selected_piece[0] * CELL_SIZE + MARGIN + CELL_SIZE // 2), 
                            CELL_SIZE // 2 - 10)
     for move in legal_moves:
+        # move[2] and move[3] are the destination coordinates (y1, x1)
         pygame.draw.circle(screen, (0, 255, 0), 
                            (move[3] * CELL_SIZE + MARGIN + CELL_SIZE // 2, move[2] * CELL_SIZE + MARGIN + CELL_SIZE // 2), 
                            CELL_SIZE // 2 - 25)
 
+# Get the grid cell based on mouse position
 def get_cell_at_position(pos):
     x = (pos[0] - MARGIN) // CELL_SIZE
     y = (pos[1] - MARGIN) // CELL_SIZE
@@ -68,28 +74,30 @@ def get_cell_at_position(pos):
         return (y, x)
     return None
 
+# Reset game to initial state
 def reset_game():
-    global chessboard, selected_piece, game_over
+    global chessboard, player2, selected_piece, game_over
     chessboard = Chessboard()
+    player2 = FiancoAI(chessboard, 2)
     selected_piece = None
     game_over = False
 
+# Check if the game has been won
 def check_game_over():
-    global game_over
     white_positions = chessboard.get_piece_positions(1)
     black_positions = chessboard.get_piece_positions(2)
     
     if any(piece[0] == BOARD_SIZE - 1 for piece in white_positions):
-        game_over = True
         return "Player 1 Wins!"
     if any(piece[0] == 0 for piece in black_positions):
-        game_over = True
         return "Player 2 Wins!"
     return None
 
+# Move a piece from one position to another
 def move_piece(from_pos, to_pos):
     chessboard.move(chessboard.player, from_pos, to_pos)
 
+# Handle user input for piece movement and resetting the game
 def handle_input():
     keys = pygame.key.get_pressed()
     
@@ -108,44 +116,49 @@ def handle_input():
                 move_piece((y, x), (y + dy, x + dx))
                 break
 
-def main_game_loop():
-    global game_over, selected_piece
+# Main game loop
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_BACKSPACE:
+                reset_game()
+            elif event.key == pygame.K_u:
+                chessboard.undo()
     
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN and not game_over:
-                pos = pygame.mouse.get_pos()
-                cell = get_cell_at_position(pos)
-                if cell:
-                    if selected_piece:
-                        move_piece(selected_piece, cell)
-                        selected_piece = None
-                    elif cell in chessboard.get_piece_positions(chessboard.player):
-                        selected_piece = cell
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_BACKSPACE:
-                    reset_game()
-                if event.key == pygame.K_u:
-                    chessboard.undo()
-
-
-        handle_input()
-
-        screen.fill(GREY)
-        draw_grid()
-        draw_labels()
-        draw_pieces()
-        draw_moves()
-        #draw_piece_number()
-
-        game_over_message = check_game_over()
-        if game_over_message:
-            screen.blit(font.render(game_over_message, True, BLACK), (WIDTH // 2 - FONT_SIZE, HEIGHT // 2))
-
+    # Player 1 (AI) move
+    if chessboard.player == 1 and not game_over:
+        y0, x0, y1, x1 = player1.get_move()
+        if (y0, x0) and (y1, x1):
+            chessboard.move(1, [y0, x0], [y1, x1])
+        screen.blit(font.render("AI is thinking...", True, BLACK), (WIDTH // 2 - FONT_SIZE, HEIGHT // 2))
         pygame.display.flip()
+        time.sleep(delay)
+    
+    # Player 2 (AI) move
+    elif chessboard.player == 2 and not game_over:
+        y0, x0, y1, x1 = player2.get_move()
+        if (y0, x0) and (y1, x1):
+            chessboard.move(2, [y0, x0], [y1, x1])
+        screen.blit(font.render("AI is thinking...", True, BLACK), (WIDTH // 2 - FONT_SIZE, HEIGHT // 2))
+        pygame.display.flip()
+        time.sleep(delay)
 
-if __name__ == "__main__":
-    main_game_loop()
+    handle_input()
+
+    # Drawing and updating screen
+    screen.fill(GREY)
+    draw_grid()
+    draw_labels()
+    draw_pieces()
+    draw_moves()
+    draw_piece_number()
+
+    game_over_message = check_game_over()
+    if game_over_message:
+        screen.blit(font.render(game_over_message, True, BLACK), (WIDTH // 2 - FONT_SIZE, HEIGHT // 2))
+        game_over = True
+
+    pygame.display.flip()
