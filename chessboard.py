@@ -2,6 +2,7 @@ import numpy as np
 from parameters import *
 from collections import deque
 import sys
+import random
 
 class Chessboard:
     """ 
@@ -52,6 +53,11 @@ class Chessboard:
         self.player = 1
         self.legal_moves = set(INITIAL_LEGAL_MOVES)
         self.previous = deque(maxlen=MAX_HISTORY)
+        self.table = {
+                        'white': random.getrandbits(64),
+                        'black': random.getrandbits(64),
+                        'player': [random.getrandbits(64), random.getrandbits(64)]  
+                        }
         
     def get_bitboard_position(self, y, x):
         return 1 << (y * BOARD_SIZE + x)
@@ -181,9 +187,6 @@ class Chessboard:
             # Update legal moves
             self.legalmoves()
 
-    def hash(self):
-        return compute_hash(self.board, self.table, self.player)
-
     def get_piece_positions(self, player):
         bitboard = self.white_pieces if player == 1 else self.black_pieces
         positions = set()
@@ -192,6 +195,17 @@ class Chessboard:
                 y, x = divmod(bit, BOARD_SIZE)
                 positions.add((y, x))
         return positions
+
+    def count_pieces(self, player):
+        if player == 1:
+            bitboard = self.white_pieces
+        elif player == 2:
+            bitboard = self.black_pieces
+        else:
+            raise ValueError("Invalid player number. Use 1 for white or 2 for black.")
+    
+        # Count the number of set bits in the bitboard
+        return bin(bitboard).count('1')
 
     def display(self):
         for row in range(BOARD_SIZE):
@@ -205,25 +219,14 @@ class Chessboard:
             print()
         print()
 
-    def count_pieces(self, player):
-        if player == 1:
-            bitboard = self.white_pieces
-        elif player == 2:
-            bitboard = self.black_pieces
-        else:
-            raise ValueError("Invalid player number. Use 1 for white or 2 for black.")
-    
-        # Count the number of set bits in the bitboard
-        return bin(bitboard).count('1')
+    def compute_zobrist_hash(self):
+        hash_value = 0
+        # XOR the hash values for white and black pieces
+        if self.white_pieces:
+            hash_value ^= self.table['white']
+        if self.black_pieces:
+            hash_value ^= self.table['black']
+        # XOR the hash value for the current player
+        hash_value ^= self.table['player'][self.player - 1]
+        return hash_value
 
-    # def debug_script(self):
-    #     print("white_pieces:", self.white_pieces)
-    #     print("Size of white pieces:", sys.getsizeof(self.white_pieces), "bytes")
-    #     print("Size of black pieces:", sys.getsizeof(self.black_pieces), "bytes")
-    #     print("Dimensione in memoria di blank pieces:",sys.getsizeof(self.empty_squares), "bytes")
-    #     print("dimensione in memoria di un array dei tre bitboard:", sys.getsizeof(np.array([self.white_pieces, self.black_pieces, self.empty_squares])), "bytes")
-    #     print("Dimensione in memoria di player:", self.player.__sizeof__(), "bytes")
-    #     print("legal_moves:", self.legal_moves)
-    #     print("Dimensione in memoria di legal_moves:", self.legal_moves.__sizeof__(), "bytes")
-    #     print("previous:", self.previous)
-    #     print("Dimensione in memoria di previous:", self.previous.__sizeof__(), "bytes")
