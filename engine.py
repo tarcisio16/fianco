@@ -36,13 +36,13 @@ class Engine:
         if player == WHITE:
             score += (len(board.white_pieces) - len(board.black_pieces))*5
             for piece in board.white_pieces:
-                score += piece[0] 
+                score += piece[0] **2
             for piece in board.black_pieces:
                 score -= 8 - piece[0]
         else:
             score += (len(board.black_pieces) - len(board.white_pieces))*5
             for piece in board.black_pieces:
-                score += 8 - piece[0]
+                score += (8 - piece[0])** 2
 
             for piece in board.white_pieces:
                 score -= piece[0]
@@ -51,6 +51,7 @@ class Engine:
 
     def negamax_root(self, board, depth, alpha, beta):
         """Negamax root function to be called for the top-level search."""
+        values = []
         best_value = -sys.maxsize  # Initialize best value to negative infinity
         best_move = None
         board.legal_moves(self.player)  # Get the available legal moves
@@ -62,7 +63,7 @@ class Engine:
             value = -self.negamax( depth - 1, -beta, -alpha)  # Recursively call negamax
             self.player_at_turn = 3 - self.player_at_turn  # Switch player
             board.undo(self.player)  # Undo the move
-
+            values.append(value)  # Append the value to the values list
             if value > best_value:
                 best_value = value
                 best_move = move
@@ -71,18 +72,17 @@ class Engine:
             if alpha >= beta:
                 break  # Beta cutoff, stop search
 
+        logging.debug("values: %s", values)
         return best_move  # Return the best move and its value
 
 
 
     def negamax(self,depth, alpha,beta):
-        logging.debug(f"Depth: {depth} Alpha: {alpha} Beta: {beta}, Player: {self.player_at_turn}")
         olda = alpha
         zobrist = self.board.zobrist_hash(self.player_at_turn)
         ttentry = self.retrieve_tt(zobrist)
 
         if ttentry is not None:
-            logging.debug(f"TT Hit: {ttentry}")
             ttflag, ttdepth, ttvalue = ttentry[1], ttentry[2] >> 2, ttentry[2] >> 7
             if ttdepth >= depth:
                 if ttflag == EXACT: return ttvalue
@@ -108,9 +108,7 @@ class Engine:
                 bestmove = move
                 if best_value >= beta:
                     break
-                
-        
-        return 0
+        return best_value
 
     def retrieve_tt(self, zobrist):
         zobrist_index = zobrist & 0x7FFFFF
