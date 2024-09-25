@@ -156,6 +156,21 @@ class Board:
         key ^= np.uint64(player)  # XOR the player to incluxde turn information
         return key
 
+    def zobrist_add(self, player, y, x):
+        return self.zobrist_hash(player) ^ self.zobrist[y, x, player - 1]
+
+    def zobrist_remove(self, player, y, x):
+        return self.zobrist_hash(player) ^ self.zobrist[y, x, player - 1]
+
+    def zobrist_update(self, player, y1, x1, y2, x2):
+        return self.zobrist_add(player, y2, x2) ^ self.zobrist_remove(player, y1, x1)
+
+    def zobrist_switch(self, player):
+        return self.zobrist_hash(3 - player)
+
+    
+
+
 
 
 

@@ -4,7 +4,6 @@ import logging
 import numpy as np
 import sys 
 from parameters import *
-from copy import deepcopy
 
 
 logging.basicConfig(filename='engine.log', filemode='w', level=logging.DEBUG,
@@ -28,6 +27,7 @@ class TTengine(Engine):
             return None
 
     def storett(self, zobrist, depth, value, bestmove, olda, beta):
+        
         if value <= olda:
             flag = UPPERBOUND
         elif value >= beta:
@@ -45,21 +45,20 @@ class TTengine(Engine):
         self.tt[zobrist_index][1] = np.uint64(packed)
 
     def negamax(self, depth, alpha, beta):
-        #logging.debug(f"Negamax called with depth: {depth}, alpha: {alpha}, beta: {beta}")
+        ttmove = None
         olda = alpha
         zobrist = self.board.zobrist_hash(self.player_at_turn)
         ttvalue_packed = self.retrieve_tt(zobrist)
 
         if ttvalue_packed is not None:
+            logging.debug(f"TT Hit: {self.hits}")
             self.hits += 1
-            #logging.debug(f"TT Hit: {ttvalue_packed}, depth: {depth}")
             ttvalue_packed = int(ttvalue_packed)  # Ensure we have an int for bitwise operations
             ttdepth = (ttvalue_packed >> 60) & 0xF
             ttflag = (ttvalue_packed >> 57) & 0b111
             ttsign = (ttvalue_packed >> 56) & 0x1
             ttvalue = ttvalue_packed >> 16 & 0xFFFFFFFFFF
             ttmove = (ttvalue_packed >> 12 ) &  0xF, (ttvalue_packed >> 8) & 0xF, (ttvalue_packed >> 4) & 0xF, ttvalue_packed & 0xF
-            #logging.debug(f"TT Hit: {ttvalue_packed}, depth: {depth}, flag: {ttflag}, sign: {ttsign}, value: {ttvalue}, move: {ttmove}")
 
             if ttsign == 1:
                 ttvalue = -ttvalue
@@ -82,6 +81,8 @@ class TTengine(Engine):
         best_value = -10000
 
         for move in self.board.generate_moves(self.player_at_turn):
+            if ttmove is not None and move == ttmove:
+                continue
             self.board.move(self.player_at_turn, *move)
             self.player_at_turn = 3 - self.player_at_turn
             value = -self.negamax(depth - 1, -beta, -alpha)
@@ -94,6 +95,8 @@ class TTengine(Engine):
                 alpha = max(alpha, value)
 
                 if alpha >= beta:
+
+                    zobrist = self.board.zobrist_hash(self.player_at_turn)
                     self.storett(zobrist, depth, best_value, bestmove, olda, beta)
                     break
 
