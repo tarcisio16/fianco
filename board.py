@@ -13,7 +13,8 @@ class Board:
         self.white_pieces = set({(0,0),(0,1),(0,2),(0,3),(0,4),(0,5),(0,6),(0,7),(0,8),(1,1),(1,7),(2,2),(2,6),(3,3),(3,5)})
         self.black_pieces = set({(8,0),(8,1),(8,2),(8,3),(8,4),(8,5),(8,6),(8,7),(8,8),(7,1),(7,7),(6,2),(6,6),(5,3),(5,5)})
         np.random.seed(1604)
-        self.zobrist = np.random.randint(0, 2**32, size=(BOARD_SIZE, BOARD_SIZE, 2), dtype=np.uint32) 
+        self.zobrist = np.random.randint(0, (2**63) -1, size=(BOARD_SIZE, BOARD_SIZE, 2), dtype=np.uint64) 
+
 
     def __str__(self) -> str:
         board = np.full((BOARD_SIZE, BOARD_SIZE), '-', dtype=str)
@@ -121,13 +122,13 @@ class Board:
             if y_ != -1:
                 self.white_pieces.add((y_,x_))
 
-    def zobrist_hash(self,player):
-        key = 0
+    def zobrist_hash(self, player):
+        key = np.uint64(0)
         for y, x in self.white_pieces:
-            key ^= self.zobrist[y, x, 0]
+            key ^= self.zobrist[y, x, 0]  # Use the 0 index for white pieces
         for y, x in self.black_pieces:
-            key ^= self.zobrist[y, x, 1]
-        key ^= player  
+            key ^= self.zobrist[y, x, 1]  # Use the 1 index for black pieces
+        key ^= np.uint64(player)  # XOR the player to incluxde turn information
         return key
 
 

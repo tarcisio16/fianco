@@ -2,8 +2,9 @@ import pygame
 import sys
 from board import Board
 from parameters import *
-from engine import Engine
-from main import chessboard
+from enginewithtt import TTengine as Engine
+#from engine import Engine
+from main import chessboard, engine
 
 WHITE_COLOR = (255, 255, 255)
 BLACK_COLOR = (0, 0, 0)
@@ -133,7 +134,7 @@ def main_game_loop():
                     chessboard.undo_check()
 
             elif chessboard.player == 2 and game_over == False:
-                move = engine1.negamax_root(chessboard, 5, MIN, MAX)
+                move = engine1.negamax_root(chessboard, 7, MIN, MAX)
                 print(move, chessboard.player)
                 chessboard.move(chessboard.player, move[0], move[1], move[2], move[3])
                 chessboard.player ^= 3

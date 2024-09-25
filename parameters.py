@@ -3,7 +3,7 @@ BOARD_SIZE = 9
 BLACK= 2
 WHITE = 1
 
-MAX_QUEUE_SIZE = 15
+MAX_QUEUE_SIZE = 40
 
 
 # AI Settings
@@ -44,3 +44,7 @@ SEED = 420
 
 WINNING_WHITES = ((8, 0), (8, 1), (8, 2), (8, 3), (8, 4), (8, 5), (8, 6), (8, 7), (8, 8))
 WINNING_BLACK = ((0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (0, 7), (0, 8))
+
+EXACT = 0
+LOWERBOUND = 1
+UPPERBOUND = 2
