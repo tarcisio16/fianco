@@ -46,6 +46,8 @@ def draw_labels():
     valueblack = engine1.evaluation_function(chessboard, BLACK)
     values = f"White: {valuewhite} Black: {valueblack}"
     screen.blit(font.render(values, True, BLACK_COLOR), (WIDTH // 2 - FONT_SIZE, HEIGHT - FONT_SIZE - 40))
+    hits = f"TT Hits: {engine1.hits}"
+    screen.blit(font.render(hits, True, BLACK_COLOR), (WIDTH -180 , HEIGHT - FONT_SIZE - 70))
 
 def draw_pieces():
     for pos in chessboard.white_pieces:
@@ -134,7 +136,7 @@ def main_game_loop():
                     chessboard.undo_check()
 
             elif chessboard.player == 2 and game_over == False:
-                move = engine1.negamax_root(chessboard, 7, MIN, MAX)
+                move = engine1.negamax_root(chessboard, 5, MIN, MAX)
                 print(move, chessboard.player)
                 chessboard.move(chessboard.player, move[0], move[1], move[2], move[3])
                 chessboard.player ^= 3

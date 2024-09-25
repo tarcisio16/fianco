@@ -24,6 +24,34 @@ class Board:
             board[y,x] = 'b'
         return str(board)
 
+    def generate_moves(self,player):
+        capture = False
+        current_pieces = self.white_pieces if player == WHITE else self.black_pieces
+        opponent_pieces = self.black_pieces if player == WHITE else self.white_pieces
+
+        mov_dir = 1 if player == WHITE else -1
+
+        for piece in current_pieces:
+            y, x = piece
+            for dy, dx in [(mov_dir, 1), (mov_dir, -1)]:
+                if (y + dy, x + dx) in opponent_pieces:
+                    jump_y, jump_x = y + 2 * dy, x + 2 * dx
+                    if 0 <= jump_y < BOARD_SIZE and 0 <= jump_x < BOARD_SIZE and (jump_y, jump_x) not in current_pieces and (jump_y, jump_x) not in opponent_pieces:
+                        capture = True
+                        yield (y, x, jump_y, jump_x)
+
+        for piece in current_pieces:
+            y, x = piece
+            if capture:
+                break
+            forward_y = y + mov_dir
+            if 0 <= forward_y < BOARD_SIZE and (forward_y, x) not in current_pieces and (forward_y, x) not in opponent_pieces:
+                yield (y, x, forward_y, x)
+            for dx in [-1, 1]:
+                lateral_x = x + dx
+                if 0 <= lateral_x < BOARD_SIZE and (y, lateral_x) not in current_pieces and (y, lateral_x) not in opponent_pieces:
+                    yield (y, x, y, lateral_x)
+    
     def legal_moves(self,player):
         self.legalmoves.clear()  # Clear previous legal moves
         self.capture = False  # Reset capture flag
@@ -43,23 +71,20 @@ class Board:
                 if (y + dy, x + dx) in opponent_pieces:  # Check if an opponent's piece is adjacent
                     jump_y, jump_x = y + 2 * dy, x + 2 * dx  # Calculate the jump position
                     if 0 <= jump_y < BOARD_SIZE and 0 <= jump_x < BOARD_SIZE and (jump_y, jump_x) not in current_pieces and (jump_y, jump_x) not in opponent_pieces:
-                        if not self.capture:  # If a capture is found, clear normal moves
-                            self.legalmoves.clear()
-                            self.capture = True
+                        self.capture = True
                         self.legalmoves.add((y, x, jump_y, jump_x))
 
-            # If no captures found, add normal forward and lateral moves
-            if not self.capture:
-                # Forward move
-                forward_y = y + move_dir
-                if 0 <= forward_y < BOARD_SIZE and (forward_y, x) not in current_pieces and (forward_y, x) not in opponent_pieces:
-                    self.legalmoves.add((y, x, forward_y, x))
-                
-                # Lateral moves (left and right)
-                for dx in [-1, 1]:
-                    lateral_x = x + dx
-                    if 0 <= lateral_x < BOARD_SIZE and (y, lateral_x) not in current_pieces and (y, lateral_x) not in opponent_pieces:
-                        self.legalmoves.add((y, x, y, lateral_x))
+        for piece in current_pieces:
+            y, x = piece
+            if self.capture:
+                break
+            forward_y = y + move_dir
+            if 0 <= forward_y < BOARD_SIZE and (forward_y, x) not in current_pieces and (forward_y, x) not in opponent_pieces:
+                self.legalmoves.add((y, x, forward_y, x))
+            for dx in [-1, 1]:
+                lateral_x = x + dx
+                if 0 <= lateral_x < BOARD_SIZE and (y, lateral_x) not in current_pieces and (y, lateral_x) not in opponent_pieces:
+                    self.legalmoves.add((y, x, y, lateral_x))
 
     def check_move(self,move):
         if move in self.legalmoves:
