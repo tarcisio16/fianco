@@ -121,7 +121,7 @@ def main_game_loop():
                 pygame.quit()
                 sys.exit()
             elif chessboard.player == 1 and game_over == False and event.type == pygame.MOUSEBUTTONDOWN:
-                move = engine.negamax_root(chessboard, 3, MIN, MAX)
+                move = engine.negamax_root(chessboard, 3, -10000, 10000)
                 print(move, chessboard.player)
                 chessboard.move(chessboard.player, move[0], move[1], move[2], move[3])
                 chessboard.player ^= 3
@@ -130,7 +130,7 @@ def main_game_loop():
                     reset_game()
 
             elif chessboard.player == 2 and game_over == False and event.type == pygame.MOUSEBUTTONDOWN:
-                move = engine1.negamax_root(chessboard, 5, MIN, MAX)
+                move = engine1.negamax_root(chessboard, 5, -10000, 10000)
                 print(move, chessboard.player)
                 chessboard.move(chessboard.player, move[0], move[1], move[2], move[3])
                 chessboard.player ^= 3
@@ -154,3 +154,6 @@ def main_game_loop():
 
 if __name__ == "__main__":
     main_game_loop()
+
+
+

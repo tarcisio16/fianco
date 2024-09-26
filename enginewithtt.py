@@ -3,6 +3,7 @@ from board import Board
 import logging
 import numpy as np
 import sys 
+from collections import deque
 from parameters import *
 
 
@@ -14,17 +15,15 @@ class TTengine(Engine):
     
     def __init__(self, board, player) -> None:
         super().__init__(board, player)
-        self.tt = np.zeros((2**23, 2), dtype=np.uint64)
+        self.tt = np.zeros((2**23, 2), dtype=np.uint64) # 64 BIT ENTRY |4 BIT DEPTH| | 3 BIT FLAG |1 BIT SIGN | 40 BIT VALUE|16 BIT MOVE|
         self.hits = 0
-        # 64 BIT ENTRY
-        # |4 BIT DEPTH| | 3 BIT FLAG |1 BIT SIGN | 40 BIT VALUE|16 BIT MOVE|
+        self.turn = 0
 
     def retrieve_tt(self, zobrist):
         zobrist_index = int(zobrist) & 0x7FFFFF
         if self.tt[zobrist_index][0] == zobrist:
             return self.tt[zobrist_index][1]
-        else:
-            return None
+        return None
 
     def storett(self, zobrist, depth, value, bestmove, olda, beta):
         
@@ -45,13 +44,15 @@ class TTengine(Engine):
         self.tt[zobrist_index][1] = np.uint64(packed)
 
     def negamax(self, depth, alpha, beta):
+
+        #logging.debug(f"Depth: {depth} Alpha: {alpha} Beta: {beta}, Player: {self.player_at_turn}")
         ttmove = None
         olda = alpha
         zobrist = self.board.zobrist_hash(self.player_at_turn)
         ttvalue_packed = self.retrieve_tt(zobrist)
 
         if ttvalue_packed is not None:
-            logging.debug(f"TT Hit: {self.hits}")
+            #logging.debug(f"TT Hit: {self.hits}")
             self.hits += 1
             ttvalue_packed = int(ttvalue_packed)  # Ensure we have an int for bitwise operations
             ttdepth = (ttvalue_packed >> 60) & 0xF
@@ -95,20 +96,30 @@ class TTengine(Engine):
                 alpha = max(alpha, value)
 
                 if alpha >= beta:
-
                     zobrist = self.board.zobrist_hash(self.player_at_turn)
                     self.storett(zobrist, depth, best_value, bestmove, olda, beta)
                     break
 
         return best_value
 
+    def negamax_root(self, board, depth, alpha, beta):
+        """Negamax root function to be called for the top-level search."""
+        self.turn += 1
+        best_value = -10000  # Initialize best value to negative infinity
+        best_move = None
+        for move in board.generate_moves(self.player): 
+            board.move(self.player,*move)  # Make the move
+            self.player_at_turn = 3 - self.player_at_turn  # Switch player
+            value = -self.negamax( depth - 1, -beta, -alpha)  # Recursively call negamax
+            self.player_at_turn = 3 - self.player_at_turn  # Switch player
+            board.undo(self.player)  # Undo the move
+            if value > best_value:
+                best_value = value
+            
+                best_move = move
+            alpha = max(alpha, value)  # Update alpha
 
+            if alpha >= beta:
+                break  # Beta cutoff, stop search
 
-if __name__ == "__main__":
-    # Create a board object
-    board = Board()
-
-    # Create an engine object
-    engine = TTengine(board, player=WHITE)
-    # Call the negamax function with desired depth, alpha, and beta values
-    best_value = engine.negamax(depth=5, alpha=-10000, beta=10000)
+        return best_move  # Return the best move and its value

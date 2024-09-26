@@ -47,6 +47,11 @@ class Board:
             forward_y = y + mov_dir
             if 0 <= forward_y < BOARD_SIZE and (forward_y, x) not in current_pieces and (forward_y, x) not in opponent_pieces:
                 yield (y, x, forward_y, x)
+
+        for piece in current_pieces:
+            y, x = piece
+            if capture:
+                break
             for dx in [-1, 1]:
                 lateral_x = x + dx
                 if 0 <= lateral_x < BOARD_SIZE and (y, lateral_x) not in current_pieces and (y, lateral_x) not in opponent_pieces:
@@ -113,6 +118,23 @@ class Board:
 
         self.previous.append((y1, x1, y2, x2))
 
+
+    def undomove(self,player, y1, x1, y2, x2):
+        if player == WHITE:
+            self.white_pieces.remove((y2, x2))
+            self.white_pieces.add((y1, x1))
+            if abs(y1 - y2) == 2:
+                captured = ((y1 + y2) // 2, (x1 + x2) // 2)
+                self.black_pieces.add(captured)
+        else:
+            self.black_pieces.remove((y2, x2))
+            self.black_pieces.add((y1, x1))
+            if abs(y1 - y2) == 2:
+                captured = ((y1 + y2) // 2, (x1 + x2) // 2)
+                self.white_pieces.add(captured)
+
+        self.previous.pop()
+
     def movecheck(self,player, y1,x1,y2,x2):
         move = (y1,x1,y2,x2)
         if self.check_move(move):
@@ -156,17 +178,8 @@ class Board:
         key ^= np.uint64(player)  # XOR the player to incluxde turn information
         return key
 
-    def zobrist_add(self, player, y, x):
-        return self.zobrist_hash(player) ^ self.zobrist[y, x, player - 1]
 
-    def zobrist_remove(self, player, y, x):
-        return self.zobrist_hash(player) ^ self.zobrist[y, x, player - 1]
 
-    def zobrist_update(self, player, y1, x1, y2, x2):
-        return self.zobrist_add(player, y2, x2) ^ self.zobrist_remove(player, y1, x1)
-
-    def zobrist_switch(self, player):
-        return self.zobrist_hash(3 - player)
 
     
 

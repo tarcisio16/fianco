@@ -21,10 +21,9 @@ class Engine:
 
     def evaluation_function(self,board, player):
         score = 0
-        
         winner = board.checkwin()
-        if winner == player: return 100000
-        elif winner == 3 - player: return -100000
+        if winner == player: return 1000
+        elif winner == 3 - player: return -1000
 
         def positional_score(pieces, opponent_pieces, is_white):
             
@@ -34,7 +33,7 @@ class Engine:
                 row, col = piece
                 if 3 <= row <= 5: positional_value += central_bonus
                 if is_white: 
-                    positional_value += (row) * advancement_bonus  # reward advancing towards row 8
+                    positional_value += (row) * advancement_bonus  
                 else: 
                     positional_value += (8 - row) * advancement_bonus
             
@@ -50,12 +49,12 @@ class Engine:
 
         # Adjust score for white
         if player == WHITE:
-            score += (len(board.white_pieces) - len(board.black_pieces)) * 10  
+            score += (len(board.white_pieces) - len(board.black_pieces)) *10 
             score += positional_score(board.white_pieces, board.black_pieces, is_white=True)
 
         # Adjust score for black
         else:
-            score += (len(board.black_pieces) - len(board.white_pieces)) * 10  
+            score += (len(board.black_pieces) - len(board.white_pieces)) * 10
             score += positional_score(board.black_pieces, board.white_pieces, is_white=False)
 
         return score

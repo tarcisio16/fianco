@@ -1,0 +1,1007 @@
+[
+    {
+        "label": "numpy",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "numpy",
+        "description": "numpy",
+        "detail": "numpy",
+        "documentation": {}
+    },
+    {
+        "label": "*",
+        "importPath": "parameters",
+        "description": "parameters",
+        "isExtraImport": true,
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "*",
+        "importPath": "parameters",
+        "description": "parameters",
+        "isExtraImport": true,
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "*",
+        "importPath": "parameters",
+        "description": "parameters",
+        "isExtraImport": true,
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "*",
+        "importPath": "parameters",
+        "description": "parameters",
+        "isExtraImport": true,
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "*",
+        "importPath": "parameters",
+        "description": "parameters",
+        "isExtraImport": true,
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "*",
+        "importPath": "parameters",
+        "description": "parameters",
+        "isExtraImport": true,
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "deque",
+        "importPath": "collections",
+        "description": "collections",
+        "isExtraImport": true,
+        "detail": "collections",
+        "documentation": {}
+    },
+    {
+        "label": "deque",
+        "importPath": "collections",
+        "description": "collections",
+        "isExtraImport": true,
+        "detail": "collections",
+        "documentation": {}
+    },
+    {
+        "label": "Board",
+        "importPath": "board",
+        "description": "board",
+        "isExtraImport": true,
+        "detail": "board",
+        "documentation": {}
+    },
+    {
+        "label": "Board",
+        "importPath": "board",
+        "description": "board",
+        "isExtraImport": true,
+        "detail": "board",
+        "documentation": {}
+    },
+    {
+        "label": "Board",
+        "importPath": "board",
+        "description": "board",
+        "isExtraImport": true,
+        "detail": "board",
+        "documentation": {}
+    },
+    {
+        "label": "Board",
+        "importPath": "board",
+        "description": "board",
+        "isExtraImport": true,
+        "detail": "board",
+        "documentation": {}
+    },
+    {
+        "label": "Board",
+        "importPath": "board",
+        "description": "board",
+        "isExtraImport": true,
+        "detail": "board",
+        "documentation": {}
+    },
+    {
+        "label": "sys",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sys",
+        "description": "sys",
+        "detail": "sys",
+        "documentation": {}
+    },
+    {
+        "label": "deepcopy",
+        "importPath": "copy",
+        "description": "copy",
+        "isExtraImport": true,
+        "detail": "copy",
+        "documentation": {}
+    },
+    {
+        "label": "logging",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "logging",
+        "description": "logging",
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "Engine",
+        "importPath": "engine",
+        "description": "engine",
+        "isExtraImport": true,
+        "detail": "engine",
+        "documentation": {}
+    },
+    {
+        "label": "Engine",
+        "importPath": "engine",
+        "description": "engine",
+        "isExtraImport": true,
+        "detail": "engine",
+        "documentation": {}
+    },
+    {
+        "label": "pygame",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pygame",
+        "description": "pygame",
+        "detail": "pygame",
+        "documentation": {}
+    },
+    {
+        "label": "TTengine",
+        "importPath": "enginewithtt",
+        "description": "enginewithtt",
+        "isExtraImport": true,
+        "detail": "enginewithtt",
+        "documentation": {}
+    },
+    {
+        "label": "TTengine",
+        "importPath": "enginewithtt",
+        "description": "enginewithtt",
+        "isExtraImport": true,
+        "detail": "enginewithtt",
+        "documentation": {}
+    },
+    {
+        "label": "chessboard",
+        "importPath": "main",
+        "description": "main",
+        "isExtraImport": true,
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "chessboard",
+        "importPath": "main",
+        "description": "main",
+        "isExtraImport": true,
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "engine",
+        "importPath": "main",
+        "description": "main",
+        "isExtraImport": true,
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "Board",
+        "kind": 6,
+        "importPath": "board",
+        "description": "board",
+        "peekOfCode": "class Board:\n    def __init__(self):\n        self.player = WHITE\n        self.previous = deque(maxlen=MAX_QUEUE_SIZE)\n        self.previous_capture = deque(maxlen=MAX_QUEUE_SIZE)\n        self.legalmoves = set()\n        self.capture = False\n        self.white_pieces = set({(0,0),(0,1),(0,2),(0,3),(0,4),(0,5),(0,6),(0,7),(0,8),(1,1),(1,7),(2,2),(2,6),(3,3),(3,5)})\n        self.black_pieces = set({(8,0),(8,1),(8,2),(8,3),(8,4),(8,5),(8,6),(8,7),(8,8),(7,1),(7,7),(6,2),(6,6),(5,3),(5,5)})\n        np.random.seed(1604)",
+        "detail": "board",
+        "documentation": {}
+    },
+    {
+        "label": "Engine",
+        "kind": 6,
+        "importPath": "engine",
+        "description": "engine",
+        "peekOfCode": "class Engine:\n    def __init__(self, board, player) -> None:\n        self.board = board\n        self.player = player\n        self.principal_variation = deque(maxlen=MAX_QUEUE_SIZE)\n        self.player_at_turn = player\n        self.bestmove = None\n    def evaluation_function(self,board, player):\n        score = 0\n        winner = board.checkwin()",
+        "detail": "engine",
+        "documentation": {}
+    },
+    {
+        "label": "TTengine",
+        "kind": 6,
+        "importPath": "enginewithtt",
+        "description": "enginewithtt",
+        "peekOfCode": "class TTengine(Engine):\n    def __init__(self, board, player) -> None:\n        super().__init__(board, player)\n        self.tt = np.zeros((2**23, 2), dtype=np.uint64)\n        self.hits = 0\n        # 64 BIT ENTRY\n        # |4 BIT DEPTH| | 3 BIT FLAG |1 BIT SIGN | 40 BIT VALUE|16 BIT MOVE|\n    def retrieve_tt(self, zobrist):\n        zobrist_index = int(zobrist) & 0x7FFFFF\n        if self.tt[zobrist_index][0] == zobrist:",
+        "detail": "enginewithtt",
+        "documentation": {}
+    },
+    {
+        "label": "draw_grid",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)\n    for y in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (MARGIN, y), (MARGIN + BOARD_SIZE * CELL_SIZE, y), 2)\ndef draw_labels():\n    for i in range(BOARD_SIZE):\n        screen.blit(font.render(LETTERS[i], True, BLACK_COLOR), (i * CELL_SIZE + MARGIN, FONT_SIZE // 2))\n        screen.blit(font2.render(str(i + 1), True, BLACK_COLOR), (10, MARGIN + i * CELL_SIZE))\n    player_message = f\"Player {chessboard.player}'s turn\"",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "draw_labels",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def draw_labels():\n    for i in range(BOARD_SIZE):\n        screen.blit(font.render(LETTERS[i], True, BLACK_COLOR), (i * CELL_SIZE + MARGIN, FONT_SIZE // 2))\n        screen.blit(font2.render(str(i + 1), True, BLACK_COLOR), (10, MARGIN + i * CELL_SIZE))\n    player_message = f\"Player {chessboard.player}'s turn\"\n    screen.blit(font.render(player_message, True, BLACK_COLOR), (WIDTH // 2 - FONT_SIZE, HEIGHT - FONT_SIZE - 10))\n    global engine, engine1\n    valuewhite = engine.evaluation_function(chessboard,WHITE)\n    valueblack = engine1.evaluation_function(chessboard, BLACK)\n    values = f\"White: {valuewhite} Black: {valueblack}\"",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "draw_pieces",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def draw_pieces():\n    for pos in chessboard.white_pieces:\n        pygame.draw.circle(screen, WHITE_COLOR, \n                           (pos[1] * CELL_SIZE + MARGIN + CELL_SIZE // 2, pos[0] * CELL_SIZE + MARGIN + CELL_SIZE // 2), \n                           CELL_SIZE // 2 - 10)\n    for pos in chessboard.black_pieces:\n        pygame.draw.circle(screen, BLACK_COLOR, \n                           (pos[1] * CELL_SIZE + MARGIN + CELL_SIZE // 2, pos[0] * CELL_SIZE + MARGIN + CELL_SIZE // 2), \n                           CELL_SIZE // 2 - 10)\ndef draw_moves():",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "draw_moves",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def draw_moves():\n    chessboard.legal_moves(chessboard.player)\n    legal_moves = chessboard.legalmoves\n    if selected_piece:\n        pygame.draw.circle(screen, (255, 0, 0), \n                           (selected_piece[1] * CELL_SIZE + MARGIN + CELL_SIZE // 2, selected_piece[0] * CELL_SIZE + MARGIN + CELL_SIZE // 2), \n                           CELL_SIZE // 2 - 10)\n    for move in legal_moves:\n        pygame.draw.circle(screen, (0, 255, 0), \n                           (move[3] * CELL_SIZE + MARGIN + CELL_SIZE // 2, move[2] * CELL_SIZE + MARGIN + CELL_SIZE // 2), ",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "get_cell_at_position",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def get_cell_at_position(pos):\n    x = (pos[0] - MARGIN) // CELL_SIZE\n    y = (pos[1] - MARGIN) // CELL_SIZE\n    return (y, x) if 0 <= x < BOARD_SIZE and 0 <= y < BOARD_SIZE else None\ndef reset_game():\n    global chessboard, selected_piece, game_over\n    chessboard = Board()\n    selected_piece = None\n    game_over = False\ndef check_game_over():",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "reset_game",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def reset_game():\n    global chessboard, selected_piece, game_over\n    chessboard = Board()\n    selected_piece = None\n    game_over = False\ndef check_game_over():\n    if chessboard.black_pieces.intersection(WINNING_BLACK):\n        game_over = True\n        return \"Player 2 wins!\"\n    elif chessboard.white_pieces.intersection(WINNING_WHITES):",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "check_game_over",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def check_game_over():\n    if chessboard.black_pieces.intersection(WINNING_BLACK):\n        game_over = True\n        return \"Player 2 wins!\"\n    elif chessboard.white_pieces.intersection(WINNING_WHITES):\n        game_over = True\n        return \"Player 1 wins!\"\n    return None\ndef move_piece(from_pos, to_pos):\n    chessboard.movecheck(chessboard.player, from_pos[0],from_pos[1], to_pos[0], to_pos[1])",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "move_piece",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def move_piece(from_pos, to_pos):\n    chessboard.movecheck(chessboard.player, from_pos[0],from_pos[1], to_pos[0], to_pos[1])\ndef handle_input():\n    keys = pygame.key.get_pressed()\n    if keys[pygame.K_BACKSPACE]:  # Restart the game on Backspace\n        reset_game()\n        return\n    if selected_piece:\n        move_directions = {\n            1: [(pygame.K_UP, (-1, 0)), (pygame.K_DOWN, (1, 0)), (pygame.K_LEFT, (0, -1)), (pygame.K_RIGHT, (0, 1))],",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "handle_input",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def handle_input():\n    keys = pygame.key.get_pressed()\n    if keys[pygame.K_BACKSPACE]:  # Restart the game on Backspace\n        reset_game()\n        return\n    if selected_piece:\n        move_directions = {\n            1: [(pygame.K_UP, (-1, 0)), (pygame.K_DOWN, (1, 0)), (pygame.K_LEFT, (0, -1)), (pygame.K_RIGHT, (0, 1))],\n            2: [(pygame.K_w, (-1, 0)), (pygame.K_s, (1, 0)), (pygame.K_a, (0, -1)), (pygame.K_d, (0, 1))]\n        }",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "main_game_loop",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def main_game_loop():\n    global game_over, selected_piece\n    while True:\n        for event in pygame.event.get():\n            if event.type == pygame.QUIT:\n                pygame.quit()\n                sys.exit()\n            elif event.type == pygame.MOUSEBUTTONDOWN and not game_over:\n                pos = pygame.mouse.get_pos()\n                cell = get_cell_at_position(pos)",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "WHITE_COLOR",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "WHITE_COLOR = (255, 255, 255)\nBLACK_COLOR = (0, 0, 0)\nGREY = (200, 200, 200)\n# Initialize pygame and screen dimensions\npygame.init()\nscreen = pygame.display.set_mode((WIDTH, HEIGHT))\npygame.display.set_caption(\"FIANCO\")\nfont = pygame.font.SysFont(None, FONT_SIZE)\nfont2 = pygame.font.SysFont(None, FONT_SIZE // 2)\n# Initialize game state",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "BLACK_COLOR",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "BLACK_COLOR = (0, 0, 0)\nGREY = (200, 200, 200)\n# Initialize pygame and screen dimensions\npygame.init()\nscreen = pygame.display.set_mode((WIDTH, HEIGHT))\npygame.display.set_caption(\"FIANCO\")\nfont = pygame.font.SysFont(None, FONT_SIZE)\nfont2 = pygame.font.SysFont(None, FONT_SIZE // 2)\n# Initialize game state\nchessboard = Board()",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "GREY",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "GREY = (200, 200, 200)\n# Initialize pygame and screen dimensions\npygame.init()\nscreen = pygame.display.set_mode((WIDTH, HEIGHT))\npygame.display.set_caption(\"FIANCO\")\nfont = pygame.font.SysFont(None, FONT_SIZE)\nfont2 = pygame.font.SysFont(None, FONT_SIZE // 2)\n# Initialize game state\nchessboard = Board()\nengine = Engine(chessboard, 1)",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "screen",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "screen = pygame.display.set_mode((WIDTH, HEIGHT))\npygame.display.set_caption(\"FIANCO\")\nfont = pygame.font.SysFont(None, FONT_SIZE)\nfont2 = pygame.font.SysFont(None, FONT_SIZE // 2)\n# Initialize game state\nchessboard = Board()\nengine = Engine(chessboard, 1)\nengine1 = Engine(chessboard, 2)\nselected_piece = None\ngame_over = False",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "font",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "font = pygame.font.SysFont(None, FONT_SIZE)\nfont2 = pygame.font.SysFont(None, FONT_SIZE // 2)\n# Initialize game state\nchessboard = Board()\nengine = Engine(chessboard, 1)\nengine1 = Engine(chessboard, 2)\nselected_piece = None\ngame_over = False\ndef draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "font2",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "font2 = pygame.font.SysFont(None, FONT_SIZE // 2)\n# Initialize game state\nchessboard = Board()\nengine = Engine(chessboard, 1)\nengine1 = Engine(chessboard, 2)\nselected_piece = None\ngame_over = False\ndef draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "chessboard",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "chessboard = Board()\nengine = Engine(chessboard, 1)\nengine1 = Engine(chessboard, 2)\nselected_piece = None\ngame_over = False\ndef draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)\n    for y in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (MARGIN, y), (MARGIN + BOARD_SIZE * CELL_SIZE, y), 2)",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "engine",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "engine = Engine(chessboard, 1)\nengine1 = Engine(chessboard, 2)\nselected_piece = None\ngame_over = False\ndef draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)\n    for y in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (MARGIN, y), (MARGIN + BOARD_SIZE * CELL_SIZE, y), 2)\ndef draw_labels():",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "engine1",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "engine1 = Engine(chessboard, 2)\nselected_piece = None\ngame_over = False\ndef draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)\n    for y in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (MARGIN, y), (MARGIN + BOARD_SIZE * CELL_SIZE, y), 2)\ndef draw_labels():\n    for i in range(BOARD_SIZE):",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "selected_piece",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "selected_piece = None\ngame_over = False\ndef draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)\n    for y in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (MARGIN, y), (MARGIN + BOARD_SIZE * CELL_SIZE, y), 2)\ndef draw_labels():\n    for i in range(BOARD_SIZE):\n        screen.blit(font.render(LETTERS[i], True, BLACK_COLOR), (i * CELL_SIZE + MARGIN, FONT_SIZE // 2))",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "game_over",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "game_over = False\ndef draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)\n    for y in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (MARGIN, y), (MARGIN + BOARD_SIZE * CELL_SIZE, y), 2)\ndef draw_labels():\n    for i in range(BOARD_SIZE):\n        screen.blit(font.render(LETTERS[i], True, BLACK_COLOR), (i * CELL_SIZE + MARGIN, FONT_SIZE // 2))\n        screen.blit(font2.render(str(i + 1), True, BLACK_COLOR), (10, MARGIN + i * CELL_SIZE))",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "draw_grid",
+        "kind": 2,
+        "importPath": "main1",
+        "description": "main1",
+        "peekOfCode": "def draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)\n    for y in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (MARGIN, y), (MARGIN + BOARD_SIZE * CELL_SIZE, y), 2)\ndef draw_labels():\n    for i in range(BOARD_SIZE):\n        screen.blit(font.render(LETTERS[i], True, BLACK_COLOR), (i * CELL_SIZE + MARGIN, FONT_SIZE // 2))\n        screen.blit(font2.render(str(i + 1), True, BLACK_COLOR), (10, MARGIN + i * CELL_SIZE))\n    player_message = f\"Player {chessboard.player}'s turn\"",
+        "detail": "main1",
+        "documentation": {}
+    },
+    {
+        "label": "draw_labels",
+        "kind": 2,
+        "importPath": "main1",
+        "description": "main1",
+        "peekOfCode": "def draw_labels():\n    for i in range(BOARD_SIZE):\n        screen.blit(font.render(LETTERS[i], True, BLACK_COLOR), (i * CELL_SIZE + MARGIN, FONT_SIZE // 2))\n        screen.blit(font2.render(str(i + 1), True, BLACK_COLOR), (10, MARGIN + i * CELL_SIZE))\n    player_message = f\"Player {chessboard.player}'s turn\"\n    screen.blit(font.render(player_message, True, BLACK_COLOR), (WIDTH // 2 - FONT_SIZE, HEIGHT - FONT_SIZE - 10))\n    global engine, engine1\n    valuewhite = engine.evaluation_function(chessboard,WHITE)\n    valueblack = engine1.evaluation_function(chessboard, BLACK)\n    values = f\"White: {valuewhite} Black: {valueblack}\"",
+        "detail": "main1",
+        "documentation": {}
+    },
+    {
+        "label": "draw_pieces",
+        "kind": 2,
+        "importPath": "main1",
+        "description": "main1",
+        "peekOfCode": "def draw_pieces():\n    for pos in chessboard.white_pieces:\n        pygame.draw.circle(screen, WHITE_COLOR, \n                           (pos[1] * CELL_SIZE + MARGIN + CELL_SIZE // 2, pos[0] * CELL_SIZE + MARGIN + CELL_SIZE // 2), \n                           CELL_SIZE // 2 - 10)\n    for pos in chessboard.black_pieces:\n        pygame.draw.circle(screen, BLACK_COLOR, \n                           (pos[1] * CELL_SIZE + MARGIN + CELL_SIZE // 2, pos[0] * CELL_SIZE + MARGIN + CELL_SIZE // 2), \n                           CELL_SIZE // 2 - 10)\ndef draw_moves():",
+        "detail": "main1",
+        "documentation": {}
+    },
+    {
+        "label": "draw_moves",
+        "kind": 2,
+        "importPath": "main1",
+        "description": "main1",
+        "peekOfCode": "def draw_moves():\n    chessboard.legal_moves(chessboard.player)\n    legal_moves = chessboard.legalmoves\n    if selected_piece:\n        pygame.draw.circle(screen, (255, 0, 0), \n                           (selected_piece[1] * CELL_SIZE + MARGIN + CELL_SIZE // 2, selected_piece[0] * CELL_SIZE + MARGIN + CELL_SIZE // 2), \n                           CELL_SIZE // 2 - 10)\n    for move in legal_moves:\n        pygame.draw.circle(screen, (0, 255, 0), \n                           (move[3] * CELL_SIZE + MARGIN + CELL_SIZE // 2, move[2] * CELL_SIZE + MARGIN + CELL_SIZE // 2), ",
+        "detail": "main1",
+        "documentation": {}
+    },
+    {
+        "label": "get_cell_at_position",
+        "kind": 2,
+        "importPath": "main1",
+        "description": "main1",
+        "peekOfCode": "def get_cell_at_position(pos):\n    x = (pos[0] - MARGIN) // CELL_SIZE\n    y = (pos[1] - MARGIN) // CELL_SIZE\n    return (y, x) if 0 <= x < BOARD_SIZE and 0 <= y < BOARD_SIZE else None\ndef reset_game():\n    global chessboard, selected_piece, game_over\n    chessboard = Board()\n    selected_piece = None\n    game_over = False\ndef check_game_over():",
+        "detail": "main1",
+        "documentation": {}
+    },
+    {
+        "label": "reset_game",
+        "kind": 2,
+        "importPath": "main1",
+        "description": "main1",
+        "peekOfCode": "def reset_game():\n    global chessboard, selected_piece, game_over\n    chessboard = Board()\n    selected_piece = None\n    game_over = False\ndef check_game_over():\n    if chessboard.black_pieces.intersection(WINNING_BLACK):\n        game_over = True\n        return \"Player 2 wins!\"\n    elif chessboard.white_pieces.intersection(WINNING_WHITES):",
+        "detail": "main1",
+        "documentation": {}
+    },
+    {
+        "label": "check_game_over",
+        "kind": 2,
+        "importPath": "main1",
+        "description": "main1",
+        "peekOfCode": "def check_game_over():\n    if chessboard.black_pieces.intersection(WINNING_BLACK):\n        game_over = True\n        return \"Player 2 wins!\"\n    elif chessboard.white_pieces.intersection(WINNING_WHITES):\n        game_over = True\n        return \"Player 1 wins!\"\n    return None\ndef move_piece(from_pos, to_pos):\n    chessboard.movecheck(chessboard.player, from_pos[0],from_pos[1], to_pos[0], to_pos[1])",
+        "detail": "main1",
+        "documentation": {}
+    },
+    {
+        "label": "move_piece",
+        "kind": 2,
+        "importPath": "main1",
+        "description": "main1",
+        "peekOfCode": "def move_piece(from_pos, to_pos):\n    chessboard.movecheck(chessboard.player, from_pos[0],from_pos[1], to_pos[0], to_pos[1])\ndef handle_input():\n    keys = pygame.key.get_pressed()\n    if keys[pygame.K_BACKSPACE]:  # Restart the game on Backspace\n        reset_game()\n        return\n    if selected_piece:\n        move_directions = {\n            1: [(pygame.K_UP, (-1, 0)), (pygame.K_DOWN, (1, 0)), (pygame.K_LEFT, (0, -1)), (pygame.K_RIGHT, (0, 1))],",
+        "detail": "main1",
+        "documentation": {}
+    },
+    {
+        "label": "handle_input",
+        "kind": 2,
+        "importPath": "main1",
+        "description": "main1",
+        "peekOfCode": "def handle_input():\n    keys = pygame.key.get_pressed()\n    if keys[pygame.K_BACKSPACE]:  # Restart the game on Backspace\n        reset_game()\n        return\n    if selected_piece:\n        move_directions = {\n            1: [(pygame.K_UP, (-1, 0)), (pygame.K_DOWN, (1, 0)), (pygame.K_LEFT, (0, -1)), (pygame.K_RIGHT, (0, 1))],\n            2: [(pygame.K_w, (-1, 0)), (pygame.K_s, (1, 0)), (pygame.K_a, (0, -1)), (pygame.K_d, (0, 1))]\n        }",
+        "detail": "main1",
+        "documentation": {}
+    },
+    {
+        "label": "main_game_loop",
+        "kind": 2,
+        "importPath": "main1",
+        "description": "main1",
+        "peekOfCode": "def main_game_loop():\n    global game_over, selected_piece\n    while True:\n        for event in pygame.event.get():\n            if event.type == pygame.QUIT:\n                pygame.quit()\n                sys.exit()\n            elif chessboard.player == 1 and game_over == False and event.type == pygame.MOUSEBUTTONDOWN:\n                move = engine.negamax_root(chessboard, 3, MIN, MAX)\n                print(move, chessboard.player)",
+        "detail": "main1",
+        "documentation": {}
+    },
+    {
+        "label": "WHITE_COLOR",
+        "kind": 5,
+        "importPath": "main1",
+        "description": "main1",
+        "peekOfCode": "WHITE_COLOR = (255, 255, 255)\nBLACK_COLOR = (0, 0, 0)\nGREY = (200, 200, 200)\n# Initialize pygame and screen dimensions\npygame.init()\nscreen = pygame.display.set_mode((WIDTH, HEIGHT))\npygame.display.set_caption(\"FIANCO\")\nfont = pygame.font.SysFont(None, FONT_SIZE)\nfont2 = pygame.font.SysFont(None, FONT_SIZE // 2)\n# Initialize game state",
+        "detail": "main1",
+        "documentation": {}
+    },
+    {
+        "label": "BLACK_COLOR",
+        "kind": 5,
+        "importPath": "main1",
+        "description": "main1",
+        "peekOfCode": "BLACK_COLOR = (0, 0, 0)\nGREY = (200, 200, 200)\n# Initialize pygame and screen dimensions\npygame.init()\nscreen = pygame.display.set_mode((WIDTH, HEIGHT))\npygame.display.set_caption(\"FIANCO\")\nfont = pygame.font.SysFont(None, FONT_SIZE)\nfont2 = pygame.font.SysFont(None, FONT_SIZE // 2)\n# Initialize game state\nchessboard = Board()",
+        "detail": "main1",
+        "documentation": {}
+    },
+    {
+        "label": "GREY",
+        "kind": 5,
+        "importPath": "main1",
+        "description": "main1",
+        "peekOfCode": "GREY = (200, 200, 200)\n# Initialize pygame and screen dimensions\npygame.init()\nscreen = pygame.display.set_mode((WIDTH, HEIGHT))\npygame.display.set_caption(\"FIANCO\")\nfont = pygame.font.SysFont(None, FONT_SIZE)\nfont2 = pygame.font.SysFont(None, FONT_SIZE // 2)\n# Initialize game state\nchessboard = Board()\nengine = Engine(chessboard, 1)",
+        "detail": "main1",
+        "documentation": {}
+    },
+    {
+        "label": "screen",
+        "kind": 5,
+        "importPath": "main1",
+        "description": "main1",
+        "peekOfCode": "screen = pygame.display.set_mode((WIDTH, HEIGHT))\npygame.display.set_caption(\"FIANCO\")\nfont = pygame.font.SysFont(None, FONT_SIZE)\nfont2 = pygame.font.SysFont(None, FONT_SIZE // 2)\n# Initialize game state\nchessboard = Board()\nengine = Engine(chessboard, 1)\nengine1 = Engine(chessboard, 2)\nselected_piece = None\ngame_over = False",
+        "detail": "main1",
+        "documentation": {}
+    },
+    {
+        "label": "font",
+        "kind": 5,
+        "importPath": "main1",
+        "description": "main1",
+        "peekOfCode": "font = pygame.font.SysFont(None, FONT_SIZE)\nfont2 = pygame.font.SysFont(None, FONT_SIZE // 2)\n# Initialize game state\nchessboard = Board()\nengine = Engine(chessboard, 1)\nengine1 = Engine(chessboard, 2)\nselected_piece = None\ngame_over = False\ndef draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):",
+        "detail": "main1",
+        "documentation": {}
+    },
+    {
+        "label": "font2",
+        "kind": 5,
+        "importPath": "main1",
+        "description": "main1",
+        "peekOfCode": "font2 = pygame.font.SysFont(None, FONT_SIZE // 2)\n# Initialize game state\nchessboard = Board()\nengine = Engine(chessboard, 1)\nengine1 = Engine(chessboard, 2)\nselected_piece = None\ngame_over = False\ndef draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)",
+        "detail": "main1",
+        "documentation": {}
+    },
+    {
+        "label": "chessboard",
+        "kind": 5,
+        "importPath": "main1",
+        "description": "main1",
+        "peekOfCode": "chessboard = Board()\nengine = Engine(chessboard, 1)\nengine1 = Engine(chessboard, 2)\nselected_piece = None\ngame_over = False\ndef draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)\n    for y in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (MARGIN, y), (MARGIN + BOARD_SIZE * CELL_SIZE, y), 2)",
+        "detail": "main1",
+        "documentation": {}
+    },
+    {
+        "label": "engine",
+        "kind": 5,
+        "importPath": "main1",
+        "description": "main1",
+        "peekOfCode": "engine = Engine(chessboard, 1)\nengine1 = Engine(chessboard, 2)\nselected_piece = None\ngame_over = False\ndef draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)\n    for y in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (MARGIN, y), (MARGIN + BOARD_SIZE * CELL_SIZE, y), 2)\ndef draw_labels():",
+        "detail": "main1",
+        "documentation": {}
+    },
+    {
+        "label": "engine1",
+        "kind": 5,
+        "importPath": "main1",
+        "description": "main1",
+        "peekOfCode": "engine1 = Engine(chessboard, 2)\nselected_piece = None\ngame_over = False\ndef draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)\n    for y in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (MARGIN, y), (MARGIN + BOARD_SIZE * CELL_SIZE, y), 2)\ndef draw_labels():\n    for i in range(BOARD_SIZE):",
+        "detail": "main1",
+        "documentation": {}
+    },
+    {
+        "label": "selected_piece",
+        "kind": 5,
+        "importPath": "main1",
+        "description": "main1",
+        "peekOfCode": "selected_piece = None\ngame_over = False\ndef draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)\n    for y in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (MARGIN, y), (MARGIN + BOARD_SIZE * CELL_SIZE, y), 2)\ndef draw_labels():\n    for i in range(BOARD_SIZE):\n        screen.blit(font.render(LETTERS[i], True, BLACK_COLOR), (i * CELL_SIZE + MARGIN, FONT_SIZE // 2))",
+        "detail": "main1",
+        "documentation": {}
+    },
+    {
+        "label": "game_over",
+        "kind": 5,
+        "importPath": "main1",
+        "description": "main1",
+        "peekOfCode": "game_over = False\ndef draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)\n    for y in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (MARGIN, y), (MARGIN + BOARD_SIZE * CELL_SIZE, y), 2)\ndef draw_labels():\n    for i in range(BOARD_SIZE):\n        screen.blit(font.render(LETTERS[i], True, BLACK_COLOR), (i * CELL_SIZE + MARGIN, FONT_SIZE // 2))\n        screen.blit(font2.render(str(i + 1), True, BLACK_COLOR), (10, MARGIN + i * CELL_SIZE))",
+        "detail": "main1",
+        "documentation": {}
+    },
+    {
+        "label": "draw_grid",
+        "kind": 2,
+        "importPath": "main2",
+        "description": "main2",
+        "peekOfCode": "def draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)\n    for y in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (MARGIN, y), (MARGIN + BOARD_SIZE * CELL_SIZE, y), 2)\ndef draw_labels():\n    for i in range(BOARD_SIZE):\n        screen.blit(font.render(LETTERS[i], True, BLACK_COLOR), (i * CELL_SIZE + MARGIN, FONT_SIZE // 2))\n        screen.blit(font2.render(str(i + 1), True, BLACK_COLOR), (10, MARGIN + i * CELL_SIZE))\n    player_message = f\"Player {chessboard.player}'s turn\"",
+        "detail": "main2",
+        "documentation": {}
+    },
+    {
+        "label": "draw_labels",
+        "kind": 2,
+        "importPath": "main2",
+        "description": "main2",
+        "peekOfCode": "def draw_labels():\n    for i in range(BOARD_SIZE):\n        screen.blit(font.render(LETTERS[i], True, BLACK_COLOR), (i * CELL_SIZE + MARGIN, FONT_SIZE // 2))\n        screen.blit(font2.render(str(i + 1), True, BLACK_COLOR), (10, MARGIN + i * CELL_SIZE))\n    player_message = f\"Player {chessboard.player}'s turn\"\n    screen.blit(font.render(player_message, True, BLACK_COLOR), (WIDTH // 2 - FONT_SIZE, HEIGHT - FONT_SIZE - 10))\n    global engine, engine1\n    valuewhite = engine.evaluation_function(chessboard,WHITE)\n    valueblack = engine1.evaluation_function(chessboard, BLACK)\n    values = f\"White: {valuewhite} Black: {valueblack}\"",
+        "detail": "main2",
+        "documentation": {}
+    },
+    {
+        "label": "draw_pieces",
+        "kind": 2,
+        "importPath": "main2",
+        "description": "main2",
+        "peekOfCode": "def draw_pieces():\n    for pos in chessboard.white_pieces:\n        pygame.draw.circle(screen, WHITE_COLOR, \n                           (pos[1] * CELL_SIZE + MARGIN + CELL_SIZE // 2, pos[0] * CELL_SIZE + MARGIN + CELL_SIZE // 2), \n                           CELL_SIZE // 2 - 10)\n    for pos in chessboard.black_pieces:\n        pygame.draw.circle(screen, BLACK_COLOR, \n                           (pos[1] * CELL_SIZE + MARGIN + CELL_SIZE // 2, pos[0] * CELL_SIZE + MARGIN + CELL_SIZE // 2), \n                           CELL_SIZE // 2 - 10)\ndef draw_moves():",
+        "detail": "main2",
+        "documentation": {}
+    },
+    {
+        "label": "draw_moves",
+        "kind": 2,
+        "importPath": "main2",
+        "description": "main2",
+        "peekOfCode": "def draw_moves():\n    chessboard.legal_moves(chessboard.player)\n    legal_moves = chessboard.legalmoves\n    if selected_piece:\n        pygame.draw.circle(screen, (255, 0, 0), \n                           (selected_piece[1] * CELL_SIZE + MARGIN + CELL_SIZE // 2, selected_piece[0] * CELL_SIZE + MARGIN + CELL_SIZE // 2), \n                           CELL_SIZE // 2 - 10)\n    for move in legal_moves:\n        pygame.draw.circle(screen, (0, 255, 0), \n                           (move[3] * CELL_SIZE + MARGIN + CELL_SIZE // 2, move[2] * CELL_SIZE + MARGIN + CELL_SIZE // 2), ",
+        "detail": "main2",
+        "documentation": {}
+    },
+    {
+        "label": "get_cell_at_position",
+        "kind": 2,
+        "importPath": "main2",
+        "description": "main2",
+        "peekOfCode": "def get_cell_at_position(pos):\n    x = (pos[0] - MARGIN) // CELL_SIZE\n    y = (pos[1] - MARGIN) // CELL_SIZE\n    return (y, x) if 0 <= x < BOARD_SIZE and 0 <= y < BOARD_SIZE else None\ndef reset_game():\n    global chessboard, selected_piece, game_over\n    chessboard = Board()\n    selected_piece = None\n    game_over = False\ndef check_game_over():",
+        "detail": "main2",
+        "documentation": {}
+    },
+    {
+        "label": "reset_game",
+        "kind": 2,
+        "importPath": "main2",
+        "description": "main2",
+        "peekOfCode": "def reset_game():\n    global chessboard, selected_piece, game_over\n    chessboard = Board()\n    selected_piece = None\n    game_over = False\ndef check_game_over():\n    if chessboard.black_pieces.intersection(WINNING_BLACK):\n        game_over = True\n        return \"Player 2 wins!\"\n    elif chessboard.white_pieces.intersection(WINNING_WHITES):",
+        "detail": "main2",
+        "documentation": {}
+    },
+    {
+        "label": "check_game_over",
+        "kind": 2,
+        "importPath": "main2",
+        "description": "main2",
+        "peekOfCode": "def check_game_over():\n    if chessboard.black_pieces.intersection(WINNING_BLACK):\n        game_over = True\n        return \"Player 2 wins!\"\n    elif chessboard.white_pieces.intersection(WINNING_WHITES):\n        game_over = True\n        return \"Player 1 wins!\"\n    return None\ndef move_piece(from_pos, to_pos):\n    chessboard.movecheck(chessboard.player, from_pos[0],from_pos[1], to_pos[0], to_pos[1])",
+        "detail": "main2",
+        "documentation": {}
+    },
+    {
+        "label": "move_piece",
+        "kind": 2,
+        "importPath": "main2",
+        "description": "main2",
+        "peekOfCode": "def move_piece(from_pos, to_pos):\n    chessboard.movecheck(chessboard.player, from_pos[0],from_pos[1], to_pos[0], to_pos[1])\ndef handle_input():\n    keys = pygame.key.get_pressed()\n    if keys[pygame.K_BACKSPACE]:  # Restart the game on Backspace\n        reset_game()\n        return\n    if selected_piece:\n        move_directions = {\n            1: [(pygame.K_UP, (-1, 0)), (pygame.K_DOWN, (1, 0)), (pygame.K_LEFT, (0, -1)), (pygame.K_RIGHT, (0, 1))],",
+        "detail": "main2",
+        "documentation": {}
+    },
+    {
+        "label": "handle_input",
+        "kind": 2,
+        "importPath": "main2",
+        "description": "main2",
+        "peekOfCode": "def handle_input():\n    keys = pygame.key.get_pressed()\n    if keys[pygame.K_BACKSPACE]:  # Restart the game on Backspace\n        reset_game()\n        return\n    if selected_piece:\n        move_directions = {\n            1: [(pygame.K_UP, (-1, 0)), (pygame.K_DOWN, (1, 0)), (pygame.K_LEFT, (0, -1)), (pygame.K_RIGHT, (0, 1))],\n            2: [(pygame.K_w, (-1, 0)), (pygame.K_s, (1, 0)), (pygame.K_a, (0, -1)), (pygame.K_d, (0, 1))]\n        }",
+        "detail": "main2",
+        "documentation": {}
+    },
+    {
+        "label": "main_game_loop",
+        "kind": 2,
+        "importPath": "main2",
+        "description": "main2",
+        "peekOfCode": "def main_game_loop():\n    global game_over, selected_piece\n    while True:\n        for event in pygame.event.get():\n            if event.type == pygame.QUIT:\n                pygame.quit()\n                sys.exit()\n            elif event.type == pygame.MOUSEBUTTONDOWN and not game_over:\n                pos = pygame.mouse.get_pos()\n                cell = get_cell_at_position(pos)",
+        "detail": "main2",
+        "documentation": {}
+    },
+    {
+        "label": "WHITE_COLOR",
+        "kind": 5,
+        "importPath": "main2",
+        "description": "main2",
+        "peekOfCode": "WHITE_COLOR = (255, 255, 255)\nBLACK_COLOR = (0, 0, 0)\nGREY = (200, 200, 200)\n# Initialize pygame and screen dimensions\npygame.init()\nscreen = pygame.display.set_mode((WIDTH, HEIGHT))\npygame.display.set_caption(\"FIANCO\")\nfont = pygame.font.SysFont(None, FONT_SIZE)\nfont2 = pygame.font.SysFont(None, FONT_SIZE // 2)\n# Initialize game state",
+        "detail": "main2",
+        "documentation": {}
+    },
+    {
+        "label": "BLACK_COLOR",
+        "kind": 5,
+        "importPath": "main2",
+        "description": "main2",
+        "peekOfCode": "BLACK_COLOR = (0, 0, 0)\nGREY = (200, 200, 200)\n# Initialize pygame and screen dimensions\npygame.init()\nscreen = pygame.display.set_mode((WIDTH, HEIGHT))\npygame.display.set_caption(\"FIANCO\")\nfont = pygame.font.SysFont(None, FONT_SIZE)\nfont2 = pygame.font.SysFont(None, FONT_SIZE // 2)\n# Initialize game state\nchessboard = Board()",
+        "detail": "main2",
+        "documentation": {}
+    },
+    {
+        "label": "GREY",
+        "kind": 5,
+        "importPath": "main2",
+        "description": "main2",
+        "peekOfCode": "GREY = (200, 200, 200)\n# Initialize pygame and screen dimensions\npygame.init()\nscreen = pygame.display.set_mode((WIDTH, HEIGHT))\npygame.display.set_caption(\"FIANCO\")\nfont = pygame.font.SysFont(None, FONT_SIZE)\nfont2 = pygame.font.SysFont(None, FONT_SIZE // 2)\n# Initialize game state\nchessboard = Board()\nengine = Engine(chessboard, 1)",
+        "detail": "main2",
+        "documentation": {}
+    },
+    {
+        "label": "screen",
+        "kind": 5,
+        "importPath": "main2",
+        "description": "main2",
+        "peekOfCode": "screen = pygame.display.set_mode((WIDTH, HEIGHT))\npygame.display.set_caption(\"FIANCO\")\nfont = pygame.font.SysFont(None, FONT_SIZE)\nfont2 = pygame.font.SysFont(None, FONT_SIZE // 2)\n# Initialize game state\nchessboard = Board()\nengine = Engine(chessboard, 1)\nengine1 = Engine(chessboard, 2)\nselected_piece = None\ngame_over = False",
+        "detail": "main2",
+        "documentation": {}
+    },
+    {
+        "label": "font",
+        "kind": 5,
+        "importPath": "main2",
+        "description": "main2",
+        "peekOfCode": "font = pygame.font.SysFont(None, FONT_SIZE)\nfont2 = pygame.font.SysFont(None, FONT_SIZE // 2)\n# Initialize game state\nchessboard = Board()\nengine = Engine(chessboard, 1)\nengine1 = Engine(chessboard, 2)\nselected_piece = None\ngame_over = False\ndef draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):",
+        "detail": "main2",
+        "documentation": {}
+    },
+    {
+        "label": "font2",
+        "kind": 5,
+        "importPath": "main2",
+        "description": "main2",
+        "peekOfCode": "font2 = pygame.font.SysFont(None, FONT_SIZE // 2)\n# Initialize game state\nchessboard = Board()\nengine = Engine(chessboard, 1)\nengine1 = Engine(chessboard, 2)\nselected_piece = None\ngame_over = False\ndef draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)",
+        "detail": "main2",
+        "documentation": {}
+    },
+    {
+        "label": "chessboard",
+        "kind": 5,
+        "importPath": "main2",
+        "description": "main2",
+        "peekOfCode": "chessboard = Board()\nengine = Engine(chessboard, 1)\nengine1 = Engine(chessboard, 2)\nselected_piece = None\ngame_over = False\ndef draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)\n    for y in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (MARGIN, y), (MARGIN + BOARD_SIZE * CELL_SIZE, y), 2)",
+        "detail": "main2",
+        "documentation": {}
+    },
+    {
+        "label": "engine",
+        "kind": 5,
+        "importPath": "main2",
+        "description": "main2",
+        "peekOfCode": "engine = Engine(chessboard, 1)\nengine1 = Engine(chessboard, 2)\nselected_piece = None\ngame_over = False\ndef draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)\n    for y in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (MARGIN, y), (MARGIN + BOARD_SIZE * CELL_SIZE, y), 2)\ndef draw_labels():",
+        "detail": "main2",
+        "documentation": {}
+    },
+    {
+        "label": "engine1",
+        "kind": 5,
+        "importPath": "main2",
+        "description": "main2",
+        "peekOfCode": "engine1 = Engine(chessboard, 2)\nselected_piece = None\ngame_over = False\ndef draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)\n    for y in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (MARGIN, y), (MARGIN + BOARD_SIZE * CELL_SIZE, y), 2)\ndef draw_labels():\n    for i in range(BOARD_SIZE):",
+        "detail": "main2",
+        "documentation": {}
+    },
+    {
+        "label": "selected_piece",
+        "kind": 5,
+        "importPath": "main2",
+        "description": "main2",
+        "peekOfCode": "selected_piece = None\ngame_over = False\ndef draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)\n    for y in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (MARGIN, y), (MARGIN + BOARD_SIZE * CELL_SIZE, y), 2)\ndef draw_labels():\n    for i in range(BOARD_SIZE):\n        screen.blit(font.render(LETTERS[i], True, BLACK_COLOR), (i * CELL_SIZE + MARGIN, FONT_SIZE // 2))",
+        "detail": "main2",
+        "documentation": {}
+    },
+    {
+        "label": "game_over",
+        "kind": 5,
+        "importPath": "main2",
+        "description": "main2",
+        "peekOfCode": "game_over = False\ndef draw_grid():\n    for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)\n    for y in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):\n        pygame.draw.line(screen, BLACK_COLOR, (MARGIN, y), (MARGIN + BOARD_SIZE * CELL_SIZE, y), 2)\ndef draw_labels():\n    for i in range(BOARD_SIZE):\n        screen.blit(font.render(LETTERS[i], True, BLACK_COLOR), (i * CELL_SIZE + MARGIN, FONT_SIZE // 2))\n        screen.blit(font2.render(str(i + 1), True, BLACK_COLOR), (10, MARGIN + i * CELL_SIZE))",
+        "detail": "main2",
+        "documentation": {}
+    },
+    {
+        "label": "BOARD_SIZE",
+        "kind": 5,
+        "importPath": "parameters",
+        "description": "parameters",
+        "peekOfCode": "BOARD_SIZE = 9\nBLACK= 2\nWHITE = 1\nMAX_QUEUE_SIZE = 40\n# AI Settings\nDELAY_AI = 1\n# Screen and Grid Sizes\nWIDTH, HEIGHT = 1000, 700\nMARGIN = 70\nGRID_SIZE = 500",
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "WHITE",
+        "kind": 5,
+        "importPath": "parameters",
+        "description": "parameters",
+        "peekOfCode": "WHITE = 1\nMAX_QUEUE_SIZE = 40\n# AI Settings\nDELAY_AI = 1\n# Screen and Grid Sizes\nWIDTH, HEIGHT = 1000, 700\nMARGIN = 70\nGRID_SIZE = 500\nCELL_SIZE = GRID_SIZE // 8\n# Font and Board Sizes",
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "MAX_QUEUE_SIZE",
+        "kind": 5,
+        "importPath": "parameters",
+        "description": "parameters",
+        "peekOfCode": "MAX_QUEUE_SIZE = 40\n# AI Settings\nDELAY_AI = 1\n# Screen and Grid Sizes\nWIDTH, HEIGHT = 1000, 700\nMARGIN = 70\nGRID_SIZE = 500\nCELL_SIZE = GRID_SIZE // 8\n# Font and Board Sizes\nFONT_SIZE = 30",
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "DELAY_AI",
+        "kind": 5,
+        "importPath": "parameters",
+        "description": "parameters",
+        "peekOfCode": "DELAY_AI = 1\n# Screen and Grid Sizes\nWIDTH, HEIGHT = 1000, 700\nMARGIN = 70\nGRID_SIZE = 500\nCELL_SIZE = GRID_SIZE // 8\n# Font and Board Sizes\nFONT_SIZE = 30\nBOARD_SIZE = 9\nLETTERS = \"ABCDEFGHI\"",
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "MARGIN",
+        "kind": 5,
+        "importPath": "parameters",
+        "description": "parameters",
+        "peekOfCode": "MARGIN = 70\nGRID_SIZE = 500\nCELL_SIZE = GRID_SIZE // 8\n# Font and Board Sizes\nFONT_SIZE = 30\nBOARD_SIZE = 9\nLETTERS = \"ABCDEFGHI\"\n# Piece Types\nWHITE_PIECE = 1\nBLACK_PIECE = 2",
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "GRID_SIZE",
+        "kind": 5,
+        "importPath": "parameters",
+        "description": "parameters",
+        "peekOfCode": "GRID_SIZE = 500\nCELL_SIZE = GRID_SIZE // 8\n# Font and Board Sizes\nFONT_SIZE = 30\nBOARD_SIZE = 9\nLETTERS = \"ABCDEFGHI\"\n# Piece Types\nWHITE_PIECE = 1\nBLACK_PIECE = 2\n# AI Best Value",
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "CELL_SIZE",
+        "kind": 5,
+        "importPath": "parameters",
+        "description": "parameters",
+        "peekOfCode": "CELL_SIZE = GRID_SIZE // 8\n# Font and Board Sizes\nFONT_SIZE = 30\nBOARD_SIZE = 9\nLETTERS = \"ABCDEFGHI\"\n# Piece Types\nWHITE_PIECE = 1\nBLACK_PIECE = 2\n# AI Best Value\nBEST_VALUE = -100",
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "FONT_SIZE",
+        "kind": 5,
+        "importPath": "parameters",
+        "description": "parameters",
+        "peekOfCode": "FONT_SIZE = 30\nBOARD_SIZE = 9\nLETTERS = \"ABCDEFGHI\"\n# Piece Types\nWHITE_PIECE = 1\nBLACK_PIECE = 2\n# AI Best Value\nBEST_VALUE = -100\n# Move History\nMAX_HISTORY = 30",
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "BOARD_SIZE",
+        "kind": 5,
+        "importPath": "parameters",
+        "description": "parameters",
+        "peekOfCode": "BOARD_SIZE = 9\nLETTERS = \"ABCDEFGHI\"\n# Piece Types\nWHITE_PIECE = 1\nBLACK_PIECE = 2\n# AI Best Value\nBEST_VALUE = -100\n# Move History\nMAX_HISTORY = 30\n# Value Limits",
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "LETTERS",
+        "kind": 5,
+        "importPath": "parameters",
+        "description": "parameters",
+        "peekOfCode": "LETTERS = \"ABCDEFGHI\"\n# Piece Types\nWHITE_PIECE = 1\nBLACK_PIECE = 2\n# AI Best Value\nBEST_VALUE = -100\n# Move History\nMAX_HISTORY = 30\n# Value Limits\nMIN = 0",
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "WHITE_PIECE",
+        "kind": 5,
+        "importPath": "parameters",
+        "description": "parameters",
+        "peekOfCode": "WHITE_PIECE = 1\nBLACK_PIECE = 2\n# AI Best Value\nBEST_VALUE = -100\n# Move History\nMAX_HISTORY = 30\n# Value Limits\nMIN = 0\nMAX = 2**64 - 1\n# Number of Players",
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "BLACK_PIECE",
+        "kind": 5,
+        "importPath": "parameters",
+        "description": "parameters",
+        "peekOfCode": "BLACK_PIECE = 2\n# AI Best Value\nBEST_VALUE = -100\n# Move History\nMAX_HISTORY = 30\n# Value Limits\nMIN = 0\nMAX = 2**64 - 1\n# Number of Players\nNUMBER_OF_PLAYERS = 2",
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "BEST_VALUE",
+        "kind": 5,
+        "importPath": "parameters",
+        "description": "parameters",
+        "peekOfCode": "BEST_VALUE = -100\n# Move History\nMAX_HISTORY = 30\n# Value Limits\nMIN = 0\nMAX = 2**64 - 1\n# Number of Players\nNUMBER_OF_PLAYERS = 2\n# Random Seed\nSEED = 420",
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "MAX_HISTORY",
+        "kind": 5,
+        "importPath": "parameters",
+        "description": "parameters",
+        "peekOfCode": "MAX_HISTORY = 30\n# Value Limits\nMIN = 0\nMAX = 2**64 - 1\n# Number of Players\nNUMBER_OF_PLAYERS = 2\n# Random Seed\nSEED = 420\nWINNING_WHITES = ((8, 0), (8, 1), (8, 2), (8, 3), (8, 4), (8, 5), (8, 6), (8, 7), (8, 8))\nWINNING_BLACK = ((0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (0, 7), (0, 8))",
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "MIN",
+        "kind": 5,
+        "importPath": "parameters",
+        "description": "parameters",
+        "peekOfCode": "MIN = 0\nMAX = 2**64 - 1\n# Number of Players\nNUMBER_OF_PLAYERS = 2\n# Random Seed\nSEED = 420\nWINNING_WHITES = ((8, 0), (8, 1), (8, 2), (8, 3), (8, 4), (8, 5), (8, 6), (8, 7), (8, 8))\nWINNING_BLACK = ((0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (0, 7), (0, 8))\nEXACT = 0\nLOWERBOUND = 1",
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "MAX",
+        "kind": 5,
+        "importPath": "parameters",
+        "description": "parameters",
+        "peekOfCode": "MAX = 2**64 - 1\n# Number of Players\nNUMBER_OF_PLAYERS = 2\n# Random Seed\nSEED = 420\nWINNING_WHITES = ((8, 0), (8, 1), (8, 2), (8, 3), (8, 4), (8, 5), (8, 6), (8, 7), (8, 8))\nWINNING_BLACK = ((0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (0, 7), (0, 8))\nEXACT = 0\nLOWERBOUND = 1\nUPPERBOUND = 2",
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "NUMBER_OF_PLAYERS",
+        "kind": 5,
+        "importPath": "parameters",
+        "description": "parameters",
+        "peekOfCode": "NUMBER_OF_PLAYERS = 2\n# Random Seed\nSEED = 420\nWINNING_WHITES = ((8, 0), (8, 1), (8, 2), (8, 3), (8, 4), (8, 5), (8, 6), (8, 7), (8, 8))\nWINNING_BLACK = ((0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (0, 7), (0, 8))\nEXACT = 0\nLOWERBOUND = 1\nUPPERBOUND = 2",
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "SEED",
+        "kind": 5,
+        "importPath": "parameters",
+        "description": "parameters",
+        "peekOfCode": "SEED = 420\nWINNING_WHITES = ((8, 0), (8, 1), (8, 2), (8, 3), (8, 4), (8, 5), (8, 6), (8, 7), (8, 8))\nWINNING_BLACK = ((0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (0, 7), (0, 8))\nEXACT = 0\nLOWERBOUND = 1\nUPPERBOUND = 2",
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "WINNING_WHITES",
+        "kind": 5,
+        "importPath": "parameters",
+        "description": "parameters",
+        "peekOfCode": "WINNING_WHITES = ((8, 0), (8, 1), (8, 2), (8, 3), (8, 4), (8, 5), (8, 6), (8, 7), (8, 8))\nWINNING_BLACK = ((0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (0, 7), (0, 8))\nEXACT = 0\nLOWERBOUND = 1\nUPPERBOUND = 2",
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "WINNING_BLACK",
+        "kind": 5,
+        "importPath": "parameters",
+        "description": "parameters",
+        "peekOfCode": "WINNING_BLACK = ((0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (0, 7), (0, 8))\nEXACT = 0\nLOWERBOUND = 1\nUPPERBOUND = 2",
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "EXACT",
+        "kind": 5,
+        "importPath": "parameters",
+        "description": "parameters",
+        "peekOfCode": "EXACT = 0\nLOWERBOUND = 1\nUPPERBOUND = 2",
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "LOWERBOUND",
+        "kind": 5,
+        "importPath": "parameters",
+        "description": "parameters",
+        "peekOfCode": "LOWERBOUND = 1\nUPPERBOUND = 2",
+        "detail": "parameters",
+        "documentation": {}
+    },
+    {
+        "label": "UPPERBOUND",
+        "kind": 5,
+        "importPath": "parameters",
+        "description": "parameters",
+        "peekOfCode": "UPPERBOUND = 2",
+        "detail": "parameters",
+        "documentation": {}
+    }
+]

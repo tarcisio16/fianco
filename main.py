@@ -1,7 +1,9 @@
+import collections
 import pygame
 import sys
 from board import Board
 from parameters import *
+from collections import deque
 from engine import Engine
 
 WHITE_COLOR = (255, 255, 255)
@@ -23,6 +25,7 @@ engine = Engine(chessboard, 1)
 engine1 = Engine(chessboard, 2)
 selected_piece = None
 game_over = False
+previous = deque(maxlen=MAX_QUEUE_SIZE)
 
 
 def draw_grid():
@@ -88,6 +91,9 @@ def check_game_over():
     return None
 
 def move_piece(from_pos, to_pos):
+    global previous
+    if chessboard.check_move((from_pos[0], from_pos[1], to_pos[0], to_pos[1])):
+        previous.append((from_pos[0], from_pos[1], to_pos[0], to_pos[1]))
     chessboard.movecheck(chessboard.player, from_pos[0],from_pos[1], to_pos[0], to_pos[1])
 
 def handle_input():
@@ -109,7 +115,7 @@ def handle_input():
                 break
 
 def main_game_loop():
-    global game_over, selected_piece
+    global game_over, selected_piece, previous
     
     while True:
         for event in pygame.event.get():
@@ -129,7 +135,12 @@ def main_game_loop():
                 if event.key == pygame.K_BACKSPACE:
                     reset_game()
                 if event.key == pygame.K_u:
-                    chessboard.undo_check()
+                    if len(previous) == 0:
+                        continue
+                    move = previous.pop()
+                    print(move)
+                    chessboard.undomove(3- chessboard.player , move[0], move[1], move[2], move[3])
+                    chessboard.player ^= 3
                     
                     
 
