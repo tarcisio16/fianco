@@ -46,8 +46,11 @@ def draw_labels():
     valueblack = engine1.evaluation_function(chessboard, BLACK)
     values = f"White: {valuewhite} Black: {valueblack}"
     screen.blit(font.render(values, True, BLACK_COLOR), (WIDTH // 2 - FONT_SIZE, HEIGHT - FONT_SIZE - 40))
-    hits = f"TT Hits: {engine1.hits}"
-    screen.blit(font.render(hits, True, BLACK_COLOR), (WIDTH -180 , HEIGHT - FONT_SIZE - 70))
+    
+    hits = f"Hits b/w: {engine1.hits}, {engine.hits}"
+    nodes = f"Nodes  b/w: {engine1.nodes}, {engine.nodes}"
+    screen.blit(font.render(hits, True, BLACK_COLOR), (WIDTH -300 , HEIGHT - FONT_SIZE - 70))
+    screen.blit(font.render(nodes, True, BLACK_COLOR), (WIDTH -300 , HEIGHT - 2 * FONT_SIZE - 70))
 
 def draw_pieces():
     for pos in chessboard.white_pieces:
@@ -121,7 +124,7 @@ def main_game_loop():
                 pygame.quit()
                 sys.exit()
             elif chessboard.player == 1 and game_over == False and event.type == pygame.MOUSEBUTTONDOWN:
-                move = engine.negamax_root(chessboard, 3, -10000, 10000)
+                move = engine.negamax_root(chessboard, 4, -100000, 100000)
                 print(move, chessboard.player)
                 chessboard.move(chessboard.player, move[0], move[1], move[2], move[3])
                 chessboard.player ^= 3
@@ -130,7 +133,7 @@ def main_game_loop():
                     reset_game()
 
             elif chessboard.player == 2 and game_over == False and event.type == pygame.MOUSEBUTTONDOWN:
-                move = engine1.negamax_root(chessboard, 5, -10000, 10000)
+                move = engine1.negamax_root(chessboard, 4, -100000, 100000)
                 print(move, chessboard.player)
                 chessboard.move(chessboard.player, move[0], move[1], move[2], move[3])
                 chessboard.player ^= 3

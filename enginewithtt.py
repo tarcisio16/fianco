@@ -1,125 +1,138 @@
-from engine import Engine
-from board import Board
 import logging
 import numpy as np
-import sys 
-from collections import deque
+from board import Board
+import sys
 from parameters import *
 
+TTSIZE = 2**26
+TTMASK = 0x3FFFFFF
 
 logging.basicConfig(filename='engine.log', filemode='w', level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
-class TTengine(Engine):
-
+class TTengine():
     
     def __init__(self, board, player) -> None:
-        super().__init__(board, player)
-        self.tt = np.zeros((2**23, 2), dtype=np.uint64) # 64 BIT ENTRY |4 BIT DEPTH| | 3 BIT FLAG |1 BIT SIGN | 40 BIT VALUE|16 BIT MOVE|
-        self.hits = 0
-        self.turn = 0
+        self.board = board
+        self.player = player
+        self.player_at_turn = player
+        self.tt = np.zeros((TTSIZE, 2), dtype=np.uint64)  # 64-bit entry: |depth (4)|flag (3)|sign (1)|value (40)|move (16)|
+        self.hits = self.turn = self.nodes = 0
 
     def retrieve_tt(self, zobrist):
-        zobrist_index = int(zobrist) & 0x7FFFFF
-        if self.tt[zobrist_index][0] == zobrist:
-            return self.tt[zobrist_index][1]
-        return None
+        entry = self.tt[int(zobrist) & TTMASK]
+        return int(entry[1]) if entry[0] == zobrist else None
 
-    def storett(self, zobrist, depth, value, bestmove, olda, beta):
-        
-        if value <= olda:
-            flag = UPPERBOUND
-        elif value >= beta:
-            flag = LOWERBOUND
-        else:
-            flag = EXACT
-        sign = 0
-        if value < 0:
-            value = abs(value)
-            sign = 1
-        
-        zobrist_index = int(zobrist) & 0x7FFFFF
-        packed = ((depth << 60) | (flag << 57) | (sign << 56) | (value << 16) | bestmove[0] << 12 | bestmove[1] << 8 | bestmove[2] << 4 | bestmove[3])
-        self.tt[zobrist_index][0] = np.uint64(zobrist)
-        self.tt[zobrist_index][1] = np.uint64(packed)
+    def store_tt(self, zobrist, depth, value, move, alpha, beta):
+        flag = LOWERBOUND if value >= beta else UPPERBOUND if value <= alpha else EXACT
+        sign = 1 if value < 0 else 0
+        value = abs(value)
+        packed = (depth << 60) | (flag << 57) | (sign << 56) | (value << 16) | (move[0] << 12) | (move[1] << 8) | (move[2] << 4) | move[3]
+        index = int(zobrist) & TTMASK
+        self.tt[index] = [np.uint64(zobrist), np.uint64(packed)]
 
     def negamax(self, depth, alpha, beta):
-
-        #logging.debug(f"Depth: {depth} Alpha: {alpha} Beta: {beta}, Player: {self.player_at_turn}")
+        self.nodes += 1
         ttmove = None
-        olda = alpha
-        zobrist = self.board.zobrist_hash(self.player_at_turn)
+        olda, zobrist = alpha, self.board.zobrist_hash(self.player_at_turn)
         ttvalue_packed = self.retrieve_tt(zobrist)
 
         if ttvalue_packed is not None:
-            #logging.debug(f"TT Hit: {self.hits}")
             self.hits += 1
-            ttvalue_packed = int(ttvalue_packed)  # Ensure we have an int for bitwise operations
-            ttdepth = (ttvalue_packed >> 60) & 0xF
-            ttflag = (ttvalue_packed >> 57) & 0b111
-            ttsign = (ttvalue_packed >> 56) & 0x1
-            ttvalue = ttvalue_packed >> 16 & 0xFFFFFFFFFF
-            ttmove = (ttvalue_packed >> 12 ) &  0xF, (ttvalue_packed >> 8) & 0xF, (ttvalue_packed >> 4) & 0xF, ttvalue_packed & 0xF
-
-            if ttsign == 1:
-                ttvalue = -ttvalue
+            tt_depth = (ttvalue_packed >> 60) & 0xF
+            if tt_depth >= depth:
+                tt_value = (ttvalue_packed >> 16) & 0xFFFFFFFFFF
+                tt_value = -tt_value if (ttvalue_packed >> 56) & 0x1 else tt_value
+                tt_flag = (ttvalue_packed >> 57) & 0b111
+                if tt_flag == EXACT: return tt_value
+                alpha, beta = (max(alpha, tt_value), beta) if tt_flag == LOWERBOUND else (alpha, min(beta, tt_value))
+                if alpha >= beta: return tt_value
 
         if depth == 0 or self.board.checkwin():
-            return super().evaluation_function(self.board, self.player_at_turn)        
+            return self.evaluation_function(self.board, self.player_at_turn)        
 
-        if ttvalue_packed is not None and ttdepth >= depth:
+        if ttvalue_packed is not None and tt_depth >= 0:
             ttmove = (ttvalue_packed >> 12) & 0xF, (ttvalue_packed >> 8) & 0xF, (ttvalue_packed >> 4) & 0XF, ttvalue_packed & 0xF
             self.board.move(self.player_at_turn, *ttmove)
             self.player_at_turn = 3 - self.player_at_turn
-            ttvalue = -self.negamax(depth - 1, -beta, -alpha)
+            best_value = -self.negamax(depth - 1, -beta, -alpha)
             self.player_at_turn = 3 - self.player_at_turn
-            self.board.undo(self.player_at_turn)
+            self.board.undomove(self.player_at_turn, *ttmove)   
             bestmove = ttmove
-            if ttvalue >= beta:
-                self.storett(zobrist, depth, ttvalue, bestmove, olda, beta)
-                return ttvalue
+            if best_value >= beta:
+                self.store_tt(zobrist, depth, best_value, bestmove, olda, beta)
+                return best_value
 
         best_value = -10000
 
         for move in self.board.generate_moves(self.player_at_turn):
+            
             if ttmove is not None and move == ttmove:
                 continue
             self.board.move(self.player_at_turn, *move)
             self.player_at_turn = 3 - self.player_at_turn
+            capture = abs(move[0] - move[2]) == 2
+            # if capture:
+            #     value = -self.negamax(depth, -beta, -alpha)
+            # else:
             value = -self.negamax(depth - 1, -beta, -alpha)
             self.player_at_turn = 3 - self.player_at_turn
-            self.board.undo(self.player_at_turn)
+            self.board.undomove(self.player_at_turn, *move)
 
             if value > best_value:
                 best_value = value
                 bestmove = move
-                alpha = max(alpha, value)
-
-                if alpha >= beta:
+                if best_value >= beta:
+                    
                     zobrist = self.board.zobrist_hash(self.player_at_turn)
-                    self.storett(zobrist, depth, best_value, bestmove, olda, beta)
-                    break
+                    self.store_tt(zobrist, depth, best_value, bestmove, olda, beta)
 
         return best_value
-
+    
     def negamax_root(self, board, depth, alpha, beta):
-        """Negamax root function to be called for the top-level search."""
+        self.hits = self.nodes = 0
         self.turn += 1
-        best_value = -10000  # Initialize best value to negative infinity
-        best_move = None
-        for move in board.generate_moves(self.player): 
-            board.move(self.player,*move)  # Make the move
-            self.player_at_turn = 3 - self.player_at_turn  # Switch player
-            value = -self.negamax( depth - 1, -beta, -alpha)  # Recursively call negamax
-            self.player_at_turn = 3 - self.player_at_turn  # Switch player
-            board.undo(self.player)  # Undo the move
+        best_value, best_move = -100000, None
+        for move in board.generate_moves(self.player):
+            board.move(self.player, *move)
+            self.player_at_turn = 3 - self.player_at_turn
+            value = -self.negamax(depth - 1, -beta, -alpha)
+            self.player_at_turn = 3 - self.player_at_turn
+            board.undomove(self.player, *move)
+
             if value > best_value:
-                best_value = value
-            
-                best_move = move
-            alpha = max(alpha, value)  # Update alpha
+                best_value, best_move = value, move
+            alpha = max(alpha, value)
+            if alpha >= beta: break
 
-            if alpha >= beta:
-                break  # Beta cutoff, stop search
+        return best_move
 
-        return best_move  # Return the best move and its value
+    def evaluation_function(self, board, player):
+        score = 0
+
+        def positional_score(pieces, opponent_pieces, is_white):
+            positional_value = 0
+            for row, col in pieces:
+                if (is_white and row == 8) or (not is_white and row == 0):
+                    positional_value += 100
+                if (is_white and row == 7) or (not is_white and row == 1):
+                    positional_value += 2 * POSITIONAL_BONUS
+                if 3 <= col <= 5:
+                    positional_value += CENTRAL_BONUS
+                advancement = row if is_white else 8 - row
+                positional_value += advancement * POSITIONAL_BONUS
+
+            return positional_value
+        
+        is_white = (player == WHITE)
+
+        player_pieces = board.white_pieces if is_white else board.black_pieces
+        opponent_pieces = board.black_pieces if is_white else board.white_pieces
+        score += (len(player_pieces) - len(opponent_pieces)) *  PIECE_BONUS
+        score += positional_score(player_pieces, opponent_pieces, is_white)
+
+        return score
+
+if __name__ == "__main__":
+    engine = TTengine(Board(), 1)
+    print(sys.getsizeof(engine.tt)/(1024*1024), "MB" ) 

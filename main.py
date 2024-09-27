@@ -4,7 +4,7 @@ import sys
 from board import Board
 from parameters import *
 from collections import deque
-from engine import Engine
+from enginewithtt import TTengine 
 
 WHITE_COLOR = (255, 255, 255)
 BLACK_COLOR = (0, 0, 0)
@@ -21,8 +21,8 @@ font2 = pygame.font.SysFont(None, FONT_SIZE // 2)
 
 # Initialize game state
 chessboard = Board()
-engine = Engine(chessboard, 1)
-engine1 = Engine(chessboard, 2)
+engine = TTengine(chessboard, 1)
+engine1 = TTengine(chessboard, 2)
 selected_piece = None
 game_over = False
 previous = deque(maxlen=MAX_QUEUE_SIZE)

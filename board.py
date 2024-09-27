@@ -101,22 +101,12 @@ class Board:
             self.white_pieces.remove((y1, x1))
             self.white_pieces.add((y2, x2))
             if abs(y1 - y2) == 2:  # Capture move
-                captured = ((y1 + y2) // 2, (x1 + x2) // 2)
-                self.black_pieces.remove(captured)
-                self.previous_capture.append(captured)
-            else:
-                self.previous_capture.append((-1, -1))  
+                self.black_pieces.remove((((y1 + y2) // 2, (x1 + x2) // 2)))
         else:
             self.black_pieces.remove((y1, x1))
             self.black_pieces.add((y2, x2))
-            if abs(y1 - y2) == 2:  # Capture move
-                captured = ((y1 + y2) // 2, (x1 + x2) // 2)
-                self.white_pieces.remove(captured)
-                self.previous_capture.append(captured)
-            else:
-                self.previous_capture.append((-1, -1)) 
-
-        self.previous.append((y1, x1, y2, x2))
+            if abs(y1 - y2) == 2:  
+                self.white_pieces.remove(((y1 + y2) // 2, (x1 + x2) // 2))
 
 
     def undomove(self,player, y1, x1, y2, x2):
@@ -133,8 +123,7 @@ class Board:
                 captured = ((y1 + y2) // 2, (x1 + x2) // 2)
                 self.white_pieces.add(captured)
 
-        self.previous.pop()
-
+                
     def movecheck(self,player, y1,x1,y2,x2):
         move = (y1,x1,y2,x2)
         if self.check_move(move):
@@ -172,7 +161,7 @@ class Board:
     def zobrist_hash(self, player):
         key = np.uint64(0)
         for y, x in self.white_pieces:
-            key ^= self.zobrist[y, x, 0]  # Use the 0 index for white pieces
+            key ^= self.zobrist[y, x, 0]
         for y, x in self.black_pieces:
             key ^= self.zobrist[y, x, 1]  # Use the 1 index for black pieces
         key ^= np.uint64(player)  # XOR the player to incluxde turn information
