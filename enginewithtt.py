@@ -3,7 +3,7 @@ import numpy as np
 from board import Board
 import sys
 from parameters import *
-import time 
+import time
 
 logging.basicConfig(filename='engine.log', filemode='w', level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -16,6 +16,7 @@ class TTengine():
         self.player_at_turn = player
         self.tt = np.zeros((TTSIZE, 2), dtype=np.uint64)  # 64-bit entry: |depth (4)|flag (3)|sign (1)|value (40)|move (16)|
         self.hits = self.turn = self.nodes = 0
+        self.evaluation = 0
 
     def retrieve_tt(self, zobrist):
         entry = self.tt[int(zobrist) & TTMASK]
@@ -103,7 +104,7 @@ class TTengine():
 
         return best_move
 
-    def negamax_iterative_deepening(self, board, max_depth, alpha, beta):
+    def negamax_iterative_deepening_root(self, board, max_depth, alpha, beta):
         self.hits = self.nodes = 0
         best_move = None
         zobrist = board.zobrist_hash(self.player)
@@ -128,6 +129,7 @@ class TTengine():
         
 
     def evaluation_function(self, board, player):
+        self.evaluation += 1
         score = 0
 
         def positional_score(pieces, opponent_pieces, is_white):
@@ -153,7 +155,20 @@ class TTengine():
 
         return score
 
-if __name__ == "__main__":
-    engine = TTengine(Board(), 1)
-    move = engine.negamax_root(engine.board, 4, -10000, 10000)
-    print(sys.getsizeof(engine.tt)/(1024*1024), "MB" ) 
+# if __name__ == "__main__":
+#     board = Board()
+#     engine = TTengine(board, 1)
+#     engine1 = TTengine(board, 2)
+#     while True:
+#         move = engine.negamax_root(board, 4, -100000, 100000)
+#         board.move(1, *move)
+#         print("Player 1 moved: ", move)
+#         print(board)
+#         move = engine1.negamax_iterative_deepening(board, 5, -100000, 100000)
+#         board.move(2, *move)
+#         print("Player 2 moved: ", move)
+#         print(board)
+#         win = board.checkwin()
+#         if win:
+#             print("Player ", win, " wins!")
+#             break

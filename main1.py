@@ -92,13 +92,7 @@ def reset_game():
     game_over = False
 
 def check_game_over():
-    if chessboard.black_pieces.intersection(WINNING_BLACK):
-        game_over = True
-        return "Player 2 wins!"
-    elif chessboard.white_pieces.intersection(WINNING_WHITES):
-        game_over = True
-        return "Player 1 wins!"
-    return None
+    return chessboard.checkwin()
 
 def move_piece(from_pos, to_pos):
     chessboard.movecheck(chessboard.player, from_pos[0],from_pos[1], to_pos[0], to_pos[1])
@@ -129,9 +123,9 @@ def main_game_loop():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif chessboard.player == 1 and game_over == False and event.type == pygame.MOUSEBUTTONDOWN:
+            elif chessboard.player == 1 and game_over == 0 and event.type == pygame.MOUSEBUTTONDOWN:
                 start = time.time()
-                move = engine.negamax_iterative_deepening(chessboard, 5, -100000, 100000)
+                move = engine.negamax_iterative_deepening_root(chessboard, 4, -100000, 100000)
                 end = time.time()
                 black_time.append(end-start)
                 chessboard.move(chessboard.player, move[0], move[1], move[2], move[3])
@@ -140,7 +134,7 @@ def main_game_loop():
                 if event.key == pygame.K_BACKSPACE:
                     reset_game()
 
-            elif chessboard.player == 2 and game_over == False and event.type == pygame.MOUSEBUTTONDOWN:
+            elif chessboard.player == 2 and game_over == 0 and event.type == pygame.MOUSEBUTTONDOWN:
                 start = time.time()
                 move = engine1.negamax_root(chessboard, 4, -100000, 100000)
                 end = time.time()
