@@ -3,9 +3,7 @@ import numpy as np
 from board import Board
 import sys
 from parameters import *
-
-TTSIZE = 2**26
-TTMASK = 0x3FFFFFF
+import time 
 
 logging.basicConfig(filename='engine.log', filemode='w', level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -48,7 +46,7 @@ class TTengine():
                 alpha, beta = (max(alpha, tt_value), beta) if tt_flag == LOWERBOUND else (alpha, min(beta, tt_value))
                 if alpha >= beta: return tt_value
 
-        if depth == 0 or self.board.checkwin():
+        if depth == 0:
             return self.evaluation_function(self.board, self.player_at_turn)        
 
         if ttvalue_packed is not None and tt_depth >= 0:
@@ -104,6 +102,30 @@ class TTengine():
             if alpha >= beta: break
 
         return best_move
+
+    def negamax_iterative_deepening(self, board, max_depth, alpha, beta):
+        self.hits = self.nodes = 0
+        best_move = None
+        zobrist = board.zobrist_hash(self.player)
+        for depth in range(1, max_depth + 1):
+            best_value, current_best_move = -1000000, None
+            
+            for move in board.generate_moves(self.player):
+                board.move(self.player, *move)
+                self.player_at_turn = 3 - self.player_at_turn
+                zobrist_move = board.zobrist_move(zobrist, self.player_at_turn, move)
+                value = -self.negamax(depth - 1, -beta, -alpha, zobrist_move)
+                self.player_at_turn = 3 - self.player_at_turn
+                board.undomove(self.player, *move)
+
+                if value > best_value:
+                    best_value, current_best_move = value, move
+                alpha = max(alpha, value)
+                if alpha >= beta: break
+            best_move = current_best_move
+
+        return best_move
+        
 
     def evaluation_function(self, board, player):
         score = 0

@@ -5,6 +5,7 @@ from parameters import *
 from enginewithtt import TTengine as Engine
 #from engine import Engine
 from main import chessboard
+import time 
 
 WHITE_COLOR = (255, 255, 255)
 BLACK_COLOR = (0, 0, 0)
@@ -25,6 +26,8 @@ engine = Engine(chessboard, 1)
 engine1 = Engine(chessboard, 2)
 selected_piece = None
 game_over = False
+black_time = []
+white_time = []
 
 
 def draw_grid():
@@ -49,8 +52,11 @@ def draw_labels():
     
     hits = f"Hits b/w: {engine1.hits}, {engine.hits}"
     nodes = f"Nodes  b/w: {engine1.nodes}, {engine.nodes}"
+    
     screen.blit(font.render(hits, True, BLACK_COLOR), (WIDTH -300 , HEIGHT - FONT_SIZE - 70))
-    screen.blit(font.render(nodes, True, BLACK_COLOR), (WIDTH -300 , HEIGHT - 2 * FONT_SIZE - 70))
+    screen.blit(font.render(nodes, True, BLACK_COLOR), (WIDTH - 300 , HEIGHT - 2 * FONT_SIZE - 70))
+    movetimes = f"Move times b/w: {round(sum(white_time),2)}, {round(sum(black_time),2)}"
+    screen.blit(font.render(movetimes, True, BLACK_COLOR), (WIDTH -300 , HEIGHT - 3 * FONT_SIZE - 70))
 
 def draw_pieces():
     for pos in chessboard.white_pieces:
@@ -124,8 +130,10 @@ def main_game_loop():
                 pygame.quit()
                 sys.exit()
             elif chessboard.player == 1 and game_over == False and event.type == pygame.MOUSEBUTTONDOWN:
-                move = engine.negamax_root(chessboard, 4, -100000, 100000)
-                print(move, chessboard.player)
+                start = time.time()
+                move = engine.negamax_iterative_deepening(chessboard, 5, -100000, 100000)
+                end = time.time()
+                black_time.append(end-start)
                 chessboard.move(chessboard.player, move[0], move[1], move[2], move[3])
                 chessboard.player ^= 3
             elif event.type == pygame.KEYDOWN:
@@ -133,8 +141,10 @@ def main_game_loop():
                     reset_game()
 
             elif chessboard.player == 2 and game_over == False and event.type == pygame.MOUSEBUTTONDOWN:
+                start = time.time()
                 move = engine1.negamax_root(chessboard, 4, -100000, 100000)
-                print(move, chessboard.player)
+                end = time.time()
+                white_time.append(end-start)
                 chessboard.move(chessboard.player, move[0], move[1], move[2], move[3])
                 chessboard.player ^= 3
                 
