@@ -14,6 +14,7 @@ class Board:
         self.black_pieces = set({(8,0),(8,1),(8,2),(8,3),(8,4),(8,5),(8,6),(8,7),(8,8),(7,1),(7,7),(6,2),(6,6),(5,3),(5,5)})
         np.random.seed(1604)
         self.zobrist = np.random.randint(0, (2**63) -1, size=(BOARD_SIZE, BOARD_SIZE, 2), dtype=np.uint64) 
+        self.zobrist_player = np.random.randint(0, (2**63) -1, size=(2), dtype=np.uint64)
 
 
     def __str__(self) -> str:
@@ -164,17 +165,26 @@ class Board:
             key ^= self.zobrist[y, x, 0]
         for y, x in self.black_pieces:
             key ^= self.zobrist[y, x, 1]  # Use the 1 index for black pieces
-        key ^= np.uint64(player)  # XOR the player to incluxde turn information
+        key ^= self.zobrist_player[player - 1]
         return key
 
+    def zobrist_move(self,zobrist,player,move):
+        
+        player = 1 if player == WHITE else 0
+        opponent = 1 - player
+        
+        zobrist ^= self.zobrist_player[opponent]
+        zobrist ^= self.zobrist_player[player]
+        
+        zobrist ^= self.zobrist[move[0], move[1], player]
+        zobrist ^= self.zobrist[move[2], move[3], player]
 
-
+        
+        if abs(move[0] - move[2]) == 2:
+            zobrist ^= self.zobrist[(move[0] + move[2]) // 2, (move[1] + move[3]) // 2, opponent]
+        return zobrist
 
     
-
-
-
-
 
         
         

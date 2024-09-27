@@ -31,10 +31,10 @@ class TTengine():
         index = int(zobrist) & TTMASK
         self.tt[index] = [np.uint64(zobrist), np.uint64(packed)]
 
-    def negamax(self, depth, alpha, beta):
+    def negamax(self, depth, alpha, beta, zobrist):
         self.nodes += 1
         ttmove = None
-        olda, zobrist = alpha, self.board.zobrist_hash(self.player_at_turn)
+        olda = alpha
         ttvalue_packed = self.retrieve_tt(zobrist)
 
         if ttvalue_packed is not None:
@@ -55,7 +55,8 @@ class TTengine():
             ttmove = (ttvalue_packed >> 12) & 0xF, (ttvalue_packed >> 8) & 0xF, (ttvalue_packed >> 4) & 0XF, ttvalue_packed & 0xF
             self.board.move(self.player_at_turn, *ttmove)
             self.player_at_turn = 3 - self.player_at_turn
-            best_value = -self.negamax(depth - 1, -beta, -alpha)
+            zobrist_move = self.board.zobrist_move(zobrist, self.player_at_turn  , ttmove)
+            best_value = -self.negamax(depth - 1, -beta, -alpha,zobrist_move)
             self.player_at_turn = 3 - self.player_at_turn
             self.board.undomove(self.player_at_turn, *ttmove)   
             bestmove = ttmove
@@ -71,11 +72,8 @@ class TTengine():
                 continue
             self.board.move(self.player_at_turn, *move)
             self.player_at_turn = 3 - self.player_at_turn
-            capture = abs(move[0] - move[2]) == 2
-            # if capture:
-            #     value = -self.negamax(depth, -beta, -alpha)
-            # else:
-            value = -self.negamax(depth - 1, -beta, -alpha)
+            zobrist_move = self.board.zobrist_move(zobrist, self.player_at_turn  , move)
+            value = -self.negamax(depth - 1, -beta, -alpha, zobrist_move)
             self.player_at_turn = 3 - self.player_at_turn
             self.board.undomove(self.player_at_turn, *move)
 
@@ -83,8 +81,6 @@ class TTengine():
                 best_value = value
                 bestmove = move
                 if best_value >= beta:
-                    
-                    zobrist = self.board.zobrist_hash(self.player_at_turn)
                     self.store_tt(zobrist, depth, best_value, bestmove, olda, beta)
 
         return best_value
@@ -93,10 +89,12 @@ class TTengine():
         self.hits = self.nodes = 0
         self.turn += 1
         best_value, best_move = -100000, None
+        zobrist = board.zobrist_hash(self.player)
         for move in board.generate_moves(self.player):
             board.move(self.player, *move)
             self.player_at_turn = 3 - self.player_at_turn
-            value = -self.negamax(depth - 1, -beta, -alpha)
+            zobrist_move = board.zobrist_move(zobrist, self.player_at_turn  , move)
+            value = -self.negamax(depth - 1, -beta, -alpha, zobrist_move)
             self.player_at_turn = 3 - self.player_at_turn
             board.undomove(self.player, *move)
 
@@ -135,4 +133,5 @@ class TTengine():
 
 if __name__ == "__main__":
     engine = TTengine(Board(), 1)
+    move = engine.negamax_root(engine.board, 4, -10000, 10000)
     print(sys.getsizeof(engine.tt)/(1024*1024), "MB" ) 
