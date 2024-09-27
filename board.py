@@ -8,14 +8,10 @@ class Board:
 
     def __init__(self):
         self.player = WHITE
-        self.previous = deque(maxlen=MAX_QUEUE_SIZE)
-        self.previous_capture = deque(maxlen=MAX_QUEUE_SIZE)
         self.legalmoves = set()
-        self.capture = False
         self.white_pieces = set({(0,0),(0,1),(0,2),(0,3),(0,4),(0,5),(0,6),(0,7),(0,8),(1,1),(1,7),(2,2),(2,6),(3,3),(3,5)})
         self.black_pieces = set({(8,0),(8,1),(8,2),(8,3),(8,4),(8,5),(8,6),(8,7),(8,8),(7,1),(7,7),(6,2),(6,6),(5,3),(5,5)})
-        
-        np.random.seed(1604)
+        np.random.seed(42069)
         self.zobrist = np.random.randint(0, (2**63) -1, size=(BOARD_SIZE, BOARD_SIZE, 2), dtype=np.uint64) 
         self.zobrist_player = np.random.randint(0, (2**63) -1, size=(2), dtype=np.uint64)
 

@@ -47,33 +47,39 @@ class TTengine():
                 alpha, beta = (max(alpha, tt_value), beta) if tt_flag == LOWERBOUND else (alpha, min(beta, tt_value))
                 if alpha >= beta: return tt_value
 
+        winner = self.board.checkwin()
+        if winner == self.player:
+            return 100000
+        elif winner == 3 - self.player:
+            return -100000
         if depth == 0:
+            self.evaluation += 1
             return self.evaluation_function(self.board, self.player_at_turn)        
 
         if ttvalue_packed is not None and tt_depth >= 0:
             ttmove = (ttvalue_packed >> 12) & 0xF, (ttvalue_packed >> 8) & 0xF, (ttvalue_packed >> 4) & 0XF, ttvalue_packed & 0xF
             self.board.move(self.player_at_turn, *ttmove)
-            self.player_at_turn = 3 - self.player_at_turn
+            self.player_at_turn ^= 3
             zobrist_move = self.board.zobrist_move(zobrist, self.player_at_turn  , ttmove)
             best_value = -self.negamax(depth - 1, -beta, -alpha,zobrist_move)
-            self.player_at_turn = 3 - self.player_at_turn
+            self.player_at_turn ^= 3
             self.board.undomove(self.player_at_turn, *ttmove)   
             bestmove = ttmove
             if best_value >= beta:
                 self.store_tt(zobrist, depth, best_value, bestmove, olda, beta)
                 return best_value
 
-        best_value = -10000
+        best_value = -100000
 
         for move in self.board.generate_moves(self.player_at_turn):
             
             if ttmove is not None and move == ttmove:
                 continue
             self.board.move(self.player_at_turn, *move)
-            self.player_at_turn = 3 - self.player_at_turn
+            self.player_at_turn ^= 3
             zobrist_move = self.board.zobrist_move(zobrist, self.player_at_turn  , move)
             value = -self.negamax(depth - 1, -beta, -alpha, zobrist_move)
-            self.player_at_turn = 3 - self.player_at_turn
+            self.player_at_turn ^= 3
             self.board.undomove(self.player_at_turn, *move)
 
             if value > best_value:
@@ -84,26 +90,6 @@ class TTengine():
 
         return best_value
     
-    def negamax_root(self, board, depth, alpha, beta):
-        self.hits = self.nodes = 0
-        self.turn += 1
-        best_value, best_move = -100000, None
-        zobrist = board.zobrist_hash(self.player)
-        for move in board.generate_moves(self.player):
-            board.move(self.player, *move)
-            self.player_at_turn = 3 - self.player_at_turn
-            zobrist_move = board.zobrist_move(zobrist, self.player_at_turn  , move)
-            value = -self.negamax(depth - 1, -beta, -alpha, zobrist_move)
-            self.player_at_turn = 3 - self.player_at_turn
-            board.undomove(self.player, *move)
-
-            if value > best_value:
-                best_value, best_move = value, move
-            alpha = max(alpha, value)
-            if alpha >= beta: break
-
-        return best_move
-
     def negamax_iterative_deepening_root(self, board, max_depth, alpha, beta):
         self.hits = self.nodes = 0
         best_move = None
@@ -113,10 +99,10 @@ class TTengine():
             
             for move in board.generate_moves(self.player):
                 board.move(self.player, *move)
-                self.player_at_turn = 3 - self.player_at_turn
+                self.player_at_turn ^= 3
                 zobrist_move = board.zobrist_move(zobrist, self.player_at_turn, move)
                 value = -self.negamax(depth - 1, -beta, -alpha, zobrist_move)
-                self.player_at_turn = 3 - self.player_at_turn
+                self.player_at_turn ^= 3
                 board.undomove(self.player, *move)
 
                 if value > best_value:
@@ -126,49 +112,53 @@ class TTengine():
             best_move = current_best_move
 
         return best_move
+
         
 
     def evaluation_function(self, board, player):
-        self.evaluation += 1
         score = 0
-
-        def positional_score(pieces, opponent_pieces, is_white):
-            positional_value = 0
-            for row, col in pieces:
-                if (is_white and row == 8) or (not is_white and row == 0):
-                    positional_value += 100
-                if (is_white and row == 7) or (not is_white and row == 1):
-                    positional_value += 2 * POSITIONAL_BONUS
-                if 3 <= col <= 5:
-                    positional_value += CENTRAL_BONUS
-                advancement = row if is_white else 8 - row
-                positional_value += advancement * POSITIONAL_BONUS
-
-            return positional_value
-        
         is_white = (player == WHITE)
 
+        # Get player and opponent pieces
         player_pieces = board.white_pieces if is_white else board.black_pieces
         opponent_pieces = board.black_pieces if is_white else board.white_pieces
-        score += (len(player_pieces) - len(opponent_pieces)) *  PIECE_BONUS
-        score += positional_score(player_pieces, opponent_pieces, is_white)
 
+        # Calculate the score based on piece counts
+        score += (len(player_pieces) - len(opponent_pieces)) * PIECE_BONUS
+
+        # Positional score calculation
+        positional_value = 0
+        for row in player_pieces:
+            # Using row directly, assuming pieces are stored in (row, col) tuples
+            row_num, _ = row
+            if (is_white and row_num == 8) or (not is_white and row_num == 0):
+                positional_value += 10000
+            if (is_white and row_num == 7) or (not is_white and row_num == 1):
+                positional_value += 2 * POSITIONAL_BONUS
+
+            # Calculate advancement in one go
+            advancement = row_num if is_white else 8 - row_num
+            positional_value += advancement * POSITIONAL_BONUS
+
+        score += positional_value
         return score
 
-# if __name__ == "__main__":
-#     board = Board()
-#     engine = TTengine(board, 1)
-#     engine1 = TTengine(board, 2)
-#     while True:
-#         move = engine.negamax_root(board, 4, -100000, 100000)
-#         board.move(1, *move)
-#         print("Player 1 moved: ", move)
-#         print(board)
-#         move = engine1.negamax_iterative_deepening(board, 5, -100000, 100000)
-#         board.move(2, *move)
-#         print("Player 2 moved: ", move)
-#         print(board)
-#         win = board.checkwin()
-#         if win:
-#             print("Player ", win, " wins!")
-#             break
+    # def negamax_root(self, board, depth, alpha, beta):
+    #     self.hits = self.nodes = self.evaluation = 0
+    #     self.turn += 1
+    #     best_value, best_move = -100000, None
+    #     zobrist = board.zobrist_hash(self.player)
+    #     for move in board.generate_moves(self.player):
+    #         board.move(self.player, *move)
+    #         self.player_at_turn = 3 - self.player_at_turn
+    #         zobrist_move = board.zobrist_move(zobrist, self.player_at_turn  , move)
+    #         value = -self.negamax(depth - 1, -beta, -alpha, zobrist_move)
+    #         self.player_at_turn = 3 - self.player_at_turn
+    #         board.undomove(self.player, *move)
+
+    #         if value > best_value:
+    #             best_value, best_move = value, move
+    #         alpha = max(alpha, value)
+    #         if alpha >= beta: break
+
+    #     return best_move
