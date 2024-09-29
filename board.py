@@ -15,6 +15,52 @@ class Board:
         self.zobrist = np.random.randint(0, (2**63) -1, size=(BOARD_SIZE, BOARD_SIZE, 2), dtype=np.uint64) 
         self.zobrist_player = np.random.randint(0, (2**63) -1, size=(2), dtype=np.uint64)
 
+    def capture_moves(self,player):
+        capture = False
+        current_pieces = self.white_pieces if player == WHITE else self.black_pieces
+        opponent_pieces = self.black_pieces if player == WHITE else self.white_pieces
+
+        mov_dir = 1 if player == WHITE else -1
+
+        for piece in current_pieces:
+            y, x = piece
+            for dy, dx in [(mov_dir, 1), (mov_dir, -1)]:
+                if (y + dy, x + dx) in opponent_pieces:
+                    jump_y, jump_x = y + 2 * dy, x + 2 * dx
+                    if 0 <= jump_y < BOARD_SIZE and 0 <= jump_x < BOARD_SIZE and (jump_y, jump_x) not in current_pieces and (jump_y, jump_x) not in opponent_pieces:
+                        yield (y, x, jump_y, jump_x)
+
+    def ordered_moves(self,player):
+        capture = False
+        current_pieces = sorted(self.white_pieces,key=lambda item: item[0], reverse=True) if player == WHITE else sorted(self.black_pieces,key=lambda item: item[0] )
+        opponent_pieces = self.black_pieces if player == WHITE else self.white_pieces
+
+        mov_dir = 1 if player == WHITE else -1
+
+        for piece in current_pieces:
+            y, x = piece
+            for dy, dx in [(mov_dir, 1), (mov_dir, -1)]:
+                if (y + dy, x + dx) in opponent_pieces:
+                    jump_y, jump_x = y + 2 * dy, x + 2 * dx
+                    if 0 <= jump_y < BOARD_SIZE and 0 <= jump_x < BOARD_SIZE and (jump_y, jump_x) not in current_pieces and (jump_y, jump_x) not in opponent_pieces:
+                        capture = True
+                        yield (y, x, jump_y, jump_x)
+        for piece in current_pieces:
+            y, x = piece
+            if capture:
+                return
+            forward_y = y + mov_dir
+            if 0 <= forward_y < BOARD_SIZE and (forward_y, x) not in current_pieces and (forward_y, x) not in opponent_pieces:
+                yield (y, x, forward_y, x)
+
+        for piece in current_pieces:
+            y, x = piece
+            for dx in LATERAL_DIRECTIONS:
+                lateral_x = x + dx
+                if 0 <= lateral_x < BOARD_SIZE and (y, lateral_x) not in current_pieces and (y, lateral_x) not in opponent_pieces:
+                    yield (y, x, y, lateral_x)
+
+
     def generate_moves(self,player):
         capture = False
         current_pieces = self.white_pieces if player == WHITE else self.black_pieces

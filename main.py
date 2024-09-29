@@ -10,8 +10,6 @@ WHITE_COLOR = (255, 255, 255)
 BLACK_COLOR = (0, 0, 0)
 GREY = (200, 200, 200)
 
-
-
 # Initialize pygame and screen dimensions
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -25,8 +23,8 @@ engine = TTengine(chessboard, 1)
 engine1 = TTengine(chessboard, 2)
 selected_piece = None
 game_over = False
-previous = deque(maxlen=MAX_QUEUE_SIZE)
-
+previous = deque(maxlen=MAX_HISTORY)
+valuewhite, valueblack = 0, 0
 
 def draw_grid():
     for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):
@@ -41,10 +39,6 @@ def draw_labels():
 
     player_message = f"Player {chessboard.player}'s turn"
     screen.blit(font.render(player_message, True, BLACK_COLOR), (WIDTH // 2 - FONT_SIZE, HEIGHT - FONT_SIZE - 10))
-
-    global engine, engine1
-    valuewhite = engine.evaluation_function(chessboard,WHITE)
-    valueblack = engine1.evaluation_function(chessboard, BLACK)
     values = f"White: {valuewhite} Black: {valueblack}"
     screen.blit(font.render(values, True, BLACK_COLOR), (WIDTH // 2 - FONT_SIZE, HEIGHT - FONT_SIZE - 40))
 
@@ -59,8 +53,7 @@ def draw_pieces():
                            CELL_SIZE // 2 - 10)
 
 def draw_moves():
-    chessboard.legal_moves(chessboard.player)
-    legal_moves = chessboard.legalmoves
+    legal_moves = list(chessboard.generate_moves(chessboard.player))
     if selected_piece:
         pygame.draw.circle(screen, (255, 0, 0), 
                            (selected_piece[1] * CELL_SIZE + MARGIN + CELL_SIZE // 2, selected_piece[0] * CELL_SIZE + MARGIN + CELL_SIZE // 2), 
@@ -91,11 +84,14 @@ def check_game_over():
     return None
 
 def move_piece(from_pos, to_pos):
-    global previous
-    if chessboard.check_move((from_pos[0], from_pos[1], to_pos[0], to_pos[1])):
+    
+    global previous, valuewhite, valueblack, chessboard
+    print(from_pos, to_pos)
+    print(from_pos[0], from_pos[1], to_pos[0], to_pos[1])
+    if chessboard.movecheck(chessboard.player,from_pos[0], from_pos[1], to_pos[0], to_pos[1]):
         previous.append((from_pos[0], from_pos[1], to_pos[0], to_pos[1]))
-    chessboard.movecheck(chessboard.player, from_pos[0],from_pos[1], to_pos[0], to_pos[1])
-
+        
+        
 def handle_input():
     keys = pygame.key.get_pressed()
     
@@ -115,7 +111,7 @@ def handle_input():
                 break
 
 def main_game_loop():
-    global game_over, selected_piece, previous
+    global game_over, selected_piece, previous, valuewhite, valueblack
     
     while True:
         for event in pygame.event.get():
@@ -128,6 +124,9 @@ def main_game_loop():
                 if cell:
                     if selected_piece:
                         move_piece(selected_piece, cell)
+                        valuewhite = chessboard.evaluation_function(WHITE)
+                        valueblack = chessboard.evaluation_function(BLACK)
+                        
                         selected_piece = None
                     else:
                         selected_piece = cell
@@ -138,11 +137,8 @@ def main_game_loop():
                     if len(previous) == 0:
                         continue
                     move = previous.pop()
-                    print(move)
-                    chessboard.undomove(3- chessboard.player , move[0], move[1], move[2], move[3])
+                    chessboard.undomove(3 - chessboard.player, move[:2], move[2:])
                     chessboard.player ^= 3
-                    
-                    
 
         handle_input()
 
