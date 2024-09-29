@@ -70,7 +70,6 @@ class ImprovedEngine(Engine):
         best_move = None
         zobrist = board.zobrist_hash(self.player)
         for depth in range(2, max_depth + 1):
-            #logging.debug(f"Depth: {depth}")
             best_value, current_best_move = -1000000, None
             for move in board.generate_moves(self.player):
                 logging.debug(f"Move: {move}, Player: {self.player}, Depth: {depth}")

@@ -10,6 +10,7 @@ class QuiescentEngine(Engine):
     def __init__(self,board,player) -> None:
         super().__init__(board,player)
         self.killer_moves = []
+        self.null = True
 
     def negamax(self, depth, alpha, beta, zobrist):
         self.nodes += 1
@@ -96,10 +97,42 @@ class QuiescentEngine(Engine):
     def negamax_iterative_deepening_root(self, board, max_depth, alpha, beta):
         self.next_turn()
         best_move = None
+        olda = alpha
         zobrist = board.zobrist_hash(self.player)
+        ttmove, olda, ttvalue_packed, tt_depth = None, alpha, self.retrieve_tt(zobrist), -1
+        depth = max_depth
+
+        if ttvalue_packed is not None:
+            self.hits += 1
+            tt_depth = (ttvalue_packed >> 60) & 0xF
+            ttmove = (ttvalue_packed >> 12) & 0xF, (ttvalue_packed >> 8) & 0xF, (ttvalue_packed >> 4) & 0XF, ttvalue_packed & 0xF
+
+            if tt_depth >= depth: 
+                tt_value = -(ttvalue_packed >> 16) & 0xFFFFFFFFFF if (ttvalue_packed >> 56) & 0x1 else (ttvalue_packed >> 16) & 0xFFFFFFFFFF
+                tt_flag = (ttvalue_packed >> 57) & 0b111
+                if tt_flag == EXACT: 
+                    return ttmove
+                alpha, beta = (max(alpha, tt_value), beta) if tt_flag == LOWERBOUND else (alpha, min(beta, tt_value))
+                if alpha >= beta: return ttmove
+
+            if tt_depth >= 0:
+                self.board.move(self.player, *ttmove)
+                self.player_at_turn ^= 3
+                zobrist_move = self.board.zobrist_move(zobrist, self.player_at_turn, ttmove)
+                best_value = -self.negamax(depth - 1, -beta, -alpha, zobrist_move)
+                self.player_at_turn ^= 3
+                self.board.undomove(self.player, *ttmove)
+                best_move = ttmove
+                if best_value >= beta:
+                    self.store_tt(zobrist, depth, best_value, best_move, olda, beta)
+                    return best_move
+        
         for depth in range(2, max_depth + 1):
             best_value, current_best_move = -100000, None
             for move in board.generate_moves(self.player):
+                if move == ttmove:
+                    continue
+                alpha = max(alpha, best_value)
                 board.move(self.player, *move)
                 self.player_at_turn ^= 3    
                 zobrist_move = board.zobrist_move(zobrist, self.player_at_turn, move)
@@ -109,8 +142,10 @@ class QuiescentEngine(Engine):
 
                 if value > best_value:
                     best_value, current_best_move = value, move
-                alpha = max(alpha, value)
-                if alpha >= beta: break
+                
+                if best_value >= beta:
+                    self.store_tt(zobrist, depth, best_value, current_best_move, olda, beta)
+                    break
             best_move = current_best_move
 
         return best_move
