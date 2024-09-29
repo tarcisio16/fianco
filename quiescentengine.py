@@ -2,13 +2,14 @@ from parameters import *
 from board import Board
 from improvedengine import ImprovedEngine as Engine
 
-EIGTHROW_WHITE = set({(7,0),(7,1),(7,2),(7,3),(7,4),(7,5),(7,6),(7,7),(7,8)})
-EIGHTROW_BLACK = set({(1,0),(1,1),(1,2),(1,3),(1,4),(1,5),(1,6),(1,7),(1,8)})
+R = 2
+
 
 class QuiescentEngine(Engine):
 
     def __init__(self,board,player) -> None:
         super().__init__(board,player)
+        self.killer_moves = []
 
     def negamax(self, depth, alpha, beta, zobrist):
         self.nodes += 1
@@ -41,6 +42,16 @@ class QuiescentEngine(Engine):
                 return best_value
 
         best_value = -1000000
+
+        # Search null move
+        if self.null and depth > R:
+            self.null = False
+            self.player_at_turn ^= 3
+            value = -self.negamax(depth - 1 - R , -beta, -beta + 1, zobrist)
+            self.player_at_turn ^= 3
+            self.null = True
+            if value >= beta:
+                return beta
         
 
         for move in self.board.generate_moves(self.player_at_turn, sorted_moves=True):
