@@ -2,9 +2,10 @@ import pygame
 import sys
 from board import Board
 from parameters import *
-from enginewithtt import TTengine as Engine
-from improvedengine import ImprovedEngine
+#from enginewithtt import TTengine as Engine
+#from improvedengine import ImprovedEngine
 import time
+from quiescentengine import QuiescentEngine as ImprovedEngine
 
 WHITE_COLOR = (255, 255, 255)
 BLACK_COLOR = (0, 0, 0)
@@ -147,6 +148,7 @@ def main_game_loop():
                 move = engine1.negamax_iterative_deepening_root(chessboard, 5, -1000000, 1000000)
                 end = time.time()
                 white_time.append(end-start)
+                print(move)
                 chessboard.move(chessboard.player, move[0], move[1], move[2], move[3])
                 chessboard.player ^= 3
                 

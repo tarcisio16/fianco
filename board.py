@@ -2,7 +2,17 @@ import numpy as np
 from parameters import *
 from collections import deque
 
-LATERAL_DIRECTIONS = (-1,1)
+LATERAL_DIRECTIONS = {(0, -1), (0, 1)}
+FORWARD_DIRECTIONS = {WHITE: (1, 0), BLACK: (-1, 0)}
+CAPTURED_PIECE_OFFSET = {WHITE: [(1, 1), (1, -1)], BLACK: [(-1, 1), (-1, -1)]}
+        
+FIANCO_BONUS = 10
+SECONDLASTROW_MOBILITY_BONUS = 50
+SECONDLASTROW_NO_MOBILITY_BONUS = 10
+THIRDROW_CAPTURE_BONUS = 50
+THIRDLASTROW_MOBILITY_BONUS = 10
+POSITIONAL_BONUS = 3
+
 
 class Board:
 
@@ -15,110 +25,51 @@ class Board:
         self.zobrist = np.random.randint(0, (2**63) -1, size=(BOARD_SIZE, BOARD_SIZE, 2), dtype=np.uint64) 
         self.zobrist_player = np.random.randint(0, (2**63) -1, size=(2), dtype=np.uint64)
 
-    def capture_moves(self,player):
-        capture = False
-        current_pieces = self.white_pieces if player == WHITE else self.black_pieces
+
+    def generate_moves(self, player, sorted_moves=False, capture=False):
+        if sorted_moves:
+            current_pieces = sorted(self.white_pieces, key=lambda item: item[0], reverse=True) if player == WHITE else sorted(self.black_pieces, key=lambda item: item[0], reverse=True)
+        else:
+            current_pieces = self.white_pieces if player == WHITE else self.black_pieces
         opponent_pieces = self.black_pieces if player == WHITE else self.white_pieces
-
-        mov_dir = 1 if player == WHITE else -1
-
+        
         for piece in current_pieces:
-            y, x = piece
-            for dy, dx in [(mov_dir, 1), (mov_dir, -1)]:
-                if (y + dy, x + dx) in opponent_pieces:
-                    jump_y, jump_x = y + 2 * dy, x + 2 * dx
-                    if 0 <= jump_y < BOARD_SIZE and 0 <= jump_x < BOARD_SIZE and (jump_y, jump_x) not in current_pieces and (jump_y, jump_x) not in opponent_pieces:
-                        yield (y, x, jump_y, jump_x)
+            for capture_offset in CAPTURED_PIECE_OFFSET[player]:
+                captured_piece = add_tuples(piece, capture_offset)
+                new_pos = add_tuples(piece, add_tuples(capture_offset, capture_offset))
+                if captured_piece in opponent_pieces and 0 <= new_pos[0] < BOARD_SIZE and 0 <= new_pos[1] < BOARD_SIZE and new_pos not in current_pieces and new_pos not in opponent_pieces:
+                    capture = True
+                    yield (*piece, *new_pos)
 
-    def ordered_moves(self,player):
-        capture = False
-        current_pieces = sorted(self.white_pieces,key=lambda item: item[0], reverse=True) if player == WHITE else sorted(self.black_pieces,key=lambda item: item[0] )
-        opponent_pieces = self.black_pieces if player == WHITE else self.white_pieces
-
-        mov_dir = 1 if player == WHITE else -1
-
-        for piece in current_pieces:
-            y, x = piece
-            for dy, dx in [(mov_dir, 1), (mov_dir, -1)]:
-                if (y + dy, x + dx) in opponent_pieces:
-                    jump_y, jump_x = y + 2 * dy, x + 2 * dx
-                    if 0 <= jump_y < BOARD_SIZE and 0 <= jump_x < BOARD_SIZE and (jump_y, jump_x) not in current_pieces and (jump_y, jump_x) not in opponent_pieces:
-                        capture = True
-                        yield (y, x, jump_y, jump_x)
-        for piece in current_pieces:
-            y, x = piece
-            if capture:
-                return
-            forward_y = y + mov_dir
-            if 0 <= forward_y < BOARD_SIZE and (forward_y, x) not in current_pieces and (forward_y, x) not in opponent_pieces:
-                yield (y, x, forward_y, x)
-
-        for piece in current_pieces:
-            y, x = piece
-            for dx in LATERAL_DIRECTIONS:
-                lateral_x = x + dx
-                if 0 <= lateral_x < BOARD_SIZE and (y, lateral_x) not in current_pieces and (y, lateral_x) not in opponent_pieces:
-                    yield (y, x, y, lateral_x)
-
-
-    def generate_moves(self,player):
-        capture = False
-        current_pieces = self.white_pieces if player == WHITE else self.black_pieces
-        opponent_pieces = self.black_pieces if player == WHITE else self.white_pieces
-
-        mov_dir = 1 if player == WHITE else -1
-
-        for piece in current_pieces:
-            y, x = piece
-            for dy, dx in [(mov_dir, 1), (mov_dir, -1)]:
-                if (y + dy, x + dx) in opponent_pieces:
-                    jump_y, jump_x = y + 2 * dy, x + 2 * dx
-                    if 0 <= jump_y < BOARD_SIZE and 0 <= jump_x < BOARD_SIZE and (jump_y, jump_x) not in current_pieces and (jump_y, jump_x) not in opponent_pieces:
-                        capture = True
-                        yield (y, x, jump_y, jump_x)
-
-        for piece in current_pieces:
-            y, x = piece
-            if capture:
-                return
-            forward_y = y + mov_dir
-            if 0 <= forward_y < BOARD_SIZE and (forward_y, x) not in current_pieces and (forward_y, x) not in opponent_pieces:
-                yield (y, x, forward_y, x)
-
-        for piece in current_pieces:
-            y, x = piece
-            for dx in LATERAL_DIRECTIONS:
-                lateral_x = x + dx
-                if 0 <= lateral_x < BOARD_SIZE and (y, lateral_x) not in current_pieces and (y, lateral_x) not in opponent_pieces:
-                    yield (y, x, y, lateral_x)
+        if not capture:
+            for piece in current_pieces:
+                new_pos = add_tuples(piece, FORWARD_DIRECTIONS[player])
+                if 0 <= new_pos[0] < BOARD_SIZE and new_pos not in current_pieces and new_pos not in opponent_pieces:
+                    yield (*piece, *new_pos)
+                for offset in LATERAL_DIRECTIONS:
+                    new_pos = add_tuples(piece, offset)
+                    if 0 <= new_pos[1] < BOARD_SIZE and new_pos not in current_pieces and new_pos not in opponent_pieces:
+                        yield (*piece, *new_pos)
 
     def move(self,player, y1, x1, y2, x2):
-        if player == WHITE:
-            self.white_pieces.remove((y1, x1))
-            self.white_pieces.add((y2, x2))
-            if abs(y1 - y2) == 2:  # Capture move
-                self.black_pieces.remove((((y1 + y2) // 2, (x1 + x2) // 2)))
-        else:
-            self.black_pieces.remove((y1, x1))
-            self.black_pieces.add((y2, x2))
-            if abs(y1 - y2) == 2:  
-                self.white_pieces.remove(((y1 + y2) // 2, (x1 + x2) // 2))
+        pieces = self.white_pieces if player == WHITE else self.black_pieces
+        opponent_pieces = self.black_pieces if player == WHITE else self.white_pieces
+
+        pieces.remove((y1, x1))
+        pieces.add((y2, x2))
+        if abs(y1 - y2) == 2:
+            opponent_pieces.remove((((y1 + y2) // 2, (x1 + x2) // 2)))
 
 
     def undomove(self,player, y1, x1, y2, x2):
-        if player == WHITE:
-            self.white_pieces.remove((y2, x2))
-            self.white_pieces.add((y1, x1))
-            if abs(y1 - y2) == 2:
-                captured = ((y1 + y2) // 2, (x1 + x2) // 2)
-                self.black_pieces.add(captured)
-        else:
-            self.black_pieces.remove((y2, x2))
-            self.black_pieces.add((y1, x1))
-            if abs(y1 - y2) == 2:
-                captured = ((y1 + y2) // 2, (x1 + x2) // 2)
-                self.white_pieces.add(captured)
-
+        pieces = self.white_pieces if player == WHITE else self.black_pieces
+        opponent_pieces = self.black_pieces if player == WHITE else self.white_pieces
+        pieces.remove((y2, x2))
+        pieces.add((y1, x1))
+        if abs(y1 - y2) == 2:
+            captured = ((y1 + y2) // 2, (x1 + x2) // 2)
+            opponent_pieces.add(captured)
+                
     def checkwin(self):
         if self.white_pieces.intersection(WINNING_WHITES) or len(self.black_pieces) == 0:
             return 1
@@ -131,7 +82,7 @@ class Board:
         for y, x in self.white_pieces:
             key ^= self.zobrist[y, x, 0]
         for y, x in self.black_pieces:
-            key ^= self.zobrist[y, x, 1]  # Use the 1 index for black pieces
+            key ^= self.zobrist[y, x, 1]
         key ^= self.zobrist_player[player - 1]
         return key
 
@@ -151,31 +102,9 @@ class Board:
             zobrist ^= self.zobrist[(move[0] + move[2]) // 2, (move[1] + move[3]) // 2, opponent]
         return zobrist
 
-    def undo(self,player):
-        y1,x1,y2,x2 = self.previous.pop()
-        y_,x_ = self.previous_capture.pop()
-        if player == WHITE:
-            self.white_pieces.remove((y2,x2))
-            self.white_pieces.add((y1,x1))
-            if y_ != -1:
-                self.black_pieces.add((y_,x_))
-        else:
-            self.black_pieces.remove((y2,x2))
-            self.black_pieces.add((y1,x1))
-            if y_ != -1:
-                self.white_pieces.add((y_,x_))
-
-    def undo_check(self):
-        if len(self.previous) == 0:
-            return False
-        else:
-            self.player ^= 3
-            self.undo(self.player)
-
-                
     def movecheck(self,player, y1,x1,y2,x2):
         move = (y1,x1,y2,x2)
-        if self.check_move(move):
+        if move in list(self.generate_moves(self.player)):
             self.move(player,y1,x1,y2,x2)
             self.player ^= 3
     
@@ -186,42 +115,60 @@ class Board:
         for y,x in self.black_pieces:
             board[y,x] = 'b'
         return str(board)
-        
-    def legal_moves(self,player):
-        self.legalmoves.clear()  # Clear previous legal moves
-        self.capture = False  # Reset capture flag
 
-        # Set the current player's pieces and the opponent's pieces
-        current_pieces = self.white_pieces if player == WHITE else self.black_pieces
+    def can_move_forward(self, pieces, player, piece):
+        forward = add_tuples(piece, FORWARD_DIRECTIONS[player])
         opponent_pieces = self.black_pieces if player == WHITE else self.white_pieces
-
-        # Move direction: White moves down the board, Black moves up
-        move_dir = 1 if player == WHITE else -1
-
-        for piece in current_pieces:
-            y, x = piece
-
-            # Check for captures (must jump over opponent diagonally)
-            for dy, dx in [(move_dir, 1), (move_dir, -1)]:
-                if (y + dy, x + dx) in opponent_pieces:  # Check if an opponent's piece is adjacent
-                    jump_y, jump_x = y + 2 * dy, x + 2 * dx  # Calculate the jump position
-                    if 0 <= jump_y < BOARD_SIZE and 0 <= jump_x < BOARD_SIZE and (jump_y, jump_x) not in current_pieces and (jump_y, jump_x) not in opponent_pieces:
-                        self.capture = True
-                        self.legalmoves.add((y, x, jump_y, jump_x))
-
-        for piece in current_pieces:
-            y, x = piece
-            if self.capture:
-                break
-            forward_y = y + move_dir
-            if 0 <= forward_y < BOARD_SIZE and (forward_y, x) not in current_pieces and (forward_y, x) not in opponent_pieces:
-                self.legalmoves.add((y, x, forward_y, x))
-            for dx in [-1, 1]:
-                lateral_x = x + dx
-                if 0 <= lateral_x < BOARD_SIZE and (y, lateral_x) not in current_pieces and (y, lateral_x) not in opponent_pieces:
-                    self.legalmoves.add((y, x, y, lateral_x))
-
-    def check_move(self,move):
-        if move in self.legalmoves:
-            return True
+        if 0 <= forward[0] < BOARD_SIZE and forward not in pieces and forward not in opponent_pieces:
+            if not any(self.generate_moves(player, capture=True)):
+                return True
         return False
+
+    def can_move_lateral(self, pieces, player, piece):
+        opponent_pieces = self.black_pieces if player == WHITE else self.white_pieces
+        for offset in LATERAL_DIRECTIONS:
+            lateral = add_tuples(piece, offset)
+            if 0 <= lateral[1] < BOARD_SIZE and lateral not in pieces and lateral not in opponent_pieces:
+                if not any(self.generate_moves(player, capture=True)):
+                    return True
+        return False
+
+    def can_capture(self, pieces, player, piece):
+        opponent_pieces = self.black_pieces if player == WHITE else self.white_pieces
+        for capture_offset in CAPTURED_PIECE_OFFSET[player]:
+            captured_piece = add_tuples(piece, capture_offset)
+            new_pos = add_tuples(piece, add_tuples(capture_offset, capture_offset))
+
+            if captured_piece in opponent_pieces and 0 <= new_pos[0] < BOARD_SIZE and 0 <= new_pos[1] < BOARD_SIZE:
+                if new_pos not in pieces and new_pos not in opponent_pieces:
+                    return True
+        return False
+
+    def evaluation_function(self, player):
+        white_score, black_score = 0, 0
+        for y, x in self.white_pieces:
+            white_score += y * POSITIONAL_BONUS + (x == 0 or x == 8) * FIANCO_BONUS
+            white_score += (y == 8) * 100000 
+        for y, x in self.black_pieces:
+            black_score += (BOARD_SIZE - y -1) * POSITIONAL_BONUS + (x == 0 or x == 8) * FIANCO_BONUS
+            black_score += (y == 0) * 100000
+
+        return white_score - black_score if player == WHITE else black_score - white_score
+        
+def add_tuples(t1, t2):
+    return (t1[0] + t2[0], t1[1] + t2[1])
+
+if __name__ == "__main__":
+    board = Board()
+    print("Player:", board.player)
+    print("Generate Moves:", list(board.generate_moves(board.player)))
+    move_list = []
+    for move in board.generate_moves(board.player, sorted_moves=True):
+        move_list.append(move)
+    print("Generate Moves Sorted:", move_list)
+    print("Generate Moves Capture:", list(board.generate_moves(board.player, capture=True)))
+    board.player = 2
+    print("Player:", board.player)
+    print("Generate Moves:", list(board.generate_moves(board.player)))
+    print("Generate Moves Sorted:", list(board.generate_moves(board.player, sorted_moves=True)))
+    print("Generate Moves Capture:", list(board.generate_moves(board.player, capture=True)))

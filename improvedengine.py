@@ -7,16 +7,11 @@ import logging
 logging.basicConfig(filename='engine.log', filemode='w', level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
-
-QUIESCENCE = False
-EIGTHROW_WHITE = set({(7,0),(7,1),(7,2),(7,3),(7,4),(7,5),(7,6),(7,7),(7,8)})
-EIGHTROW_BLACK = set({(1,0),(1,1),(1,2),(1,3),(1,4),(1,5),(1,6),(1,7),(1,8)})
-
 class ImprovedEngine(Engine):
     def __init__(self, board, player) -> None:
         super().__init__(board, player)
 
-    def negamax(self, depth, alpha, beta, zobrist, quiescence = True):
+    def negamax(self, depth, alpha, beta, zobrist):
         self.nodes += 1
         ttmove, olda, ttvalue_packed = None, alpha, self.retrieve_tt(zobrist)
         
@@ -47,11 +42,6 @@ class ImprovedEngine(Engine):
                 self.store_tt(zobrist, depth, best_value, bestmove, olda, beta)
                 return best_value
 
-        # Null move pruning
-        # best_value = -self.negamax(depth - 1, -beta, -alpha, zobrist)
-        # if best_value >= beta:
-        #     return beta
-
         best_value = -1000000
         
 
@@ -81,13 +71,13 @@ class ImprovedEngine(Engine):
         zobrist = board.zobrist_hash(self.player)
         for depth in range(2, max_depth + 1):
             #logging.debug(f"Depth: {depth}")
-            best_value, current_best_move = -100000, None
+            best_value, current_best_move = -1000000, None
             for move in board.generate_moves(self.player):
                 logging.debug(f"Move: {move}, Player: {self.player}, Depth: {depth}")
                 board.move(self.player, *move)
                 self.player_at_turn ^= 3    
                 zobrist_move = board.zobrist_move(zobrist, self.player_at_turn, move)
-                value = -self.negamax(depth - 1, -beta, -alpha, zobrist_move, quiescence=QUIESCENCE)
+                value = -self.negamax(depth - 1, -beta, -alpha, zobrist_move)
                 self.player_at_turn ^= 3
                 board.undomove(self.player, *move)
 
@@ -99,10 +89,6 @@ class ImprovedEngine(Engine):
             best_move = current_best_move
 
         return best_move
-
-    def next_turn(self):
-        self.turn += 1
-        self.hits = self.nodes = 0
 
     
 if __name__ == "__main__":
