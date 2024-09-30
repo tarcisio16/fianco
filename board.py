@@ -13,7 +13,6 @@ THIRDROW_CAPTURE_BONUS = 50
 THIRDLASTROW_MOBILITY_BONUS = 10
 POSITIONAL_BONUS = 3
 
-
 class Board:
 
     def __init__(self):
@@ -107,68 +106,26 @@ class Board:
         if move in list(self.generate_moves(self.player)):
             self.move(player,y1,x1,y2,x2)
             self.player ^= 3
-    
-    def __str__(self) -> str:
-        board = np.full((BOARD_SIZE, BOARD_SIZE), '-', dtype=str)
-        for y,x in self.white_pieces:
-            board[y,x] = 'w'
-        for y,x in self.black_pieces:
-            board[y,x] = 'b'
-        return str(board)
 
-    def can_move_forward(self, pieces, player, piece):
-        forward = add_tuples(piece, FORWARD_DIRECTIONS[player])
-        opponent_pieces = self.black_pieces if player == WHITE else self.white_pieces
-        if 0 <= forward[0] < BOARD_SIZE and forward not in pieces and forward not in opponent_pieces:
-            if not any(self.generate_moves(player, capture=True)):
-                return True
-        return False
-
-    def can_move_lateral(self, pieces, player, piece):
-        opponent_pieces = self.black_pieces if player == WHITE else self.white_pieces
-        for offset in LATERAL_DIRECTIONS:
-            lateral = add_tuples(piece, offset)
-            if 0 <= lateral[1] < BOARD_SIZE and lateral not in pieces and lateral not in opponent_pieces:
-                if not any(self.generate_moves(player, capture=True)):
-                    return True
-        return False
-
-    def can_capture(self, pieces, player, piece):
-        opponent_pieces = self.black_pieces if player == WHITE else self.white_pieces
-        for capture_offset in CAPTURED_PIECE_OFFSET[player]:
-            captured_piece = add_tuples(piece, capture_offset)
-            new_pos = add_tuples(piece, add_tuples(capture_offset, capture_offset))
-
-            if captured_piece in opponent_pieces and 0 <= new_pos[0] < BOARD_SIZE and 0 <= new_pos[1] < BOARD_SIZE:
-                if new_pos not in pieces and new_pos not in opponent_pieces:
-                    return True
-        return False
+    def __repr__(self) -> str:
+        np_board = [["-" for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)]
+        for y, x in self.white_pieces:
+            np_board[y][x] = "W"
+        for y, x in self.black_pieces:
+            np_board[y][x] = "B"
+        return "\n".join(" ".join(row) for row in np_board)
 
     def evaluation_function(self, player):
-        white_score, black_score = 0, 0
-        for y, x in self.white_pieces:
-            white_score += y * POSITIONAL_BONUS + (x == 0 or x == 8) * FIANCO_BONUS
-            white_score += (y == 8) * 100000 
-        for y, x in self.black_pieces:
-            black_score += (BOARD_SIZE - y -1) * POSITIONAL_BONUS + (x == 0 or x == 8) * FIANCO_BONUS
-            black_score += (y == 0) * 100000
+        white_score = sum(
+            y * POSITIONAL_BONUS + (FIANCO_BONUS if x in (0, 8) else 0) + (100000 if y == 8 else 0)
+            for y, x in self.white_pieces
+        )
+        black_score = sum(
+            (BOARD_SIZE - y - 1) * POSITIONAL_BONUS + (FIANCO_BONUS if x in (0, 8) else 0) + (100000 if y == 0 else 0)
+            for y, x in self.black_pieces
+        )
 
         return white_score - black_score if player == WHITE else black_score - white_score
-        
+
 def add_tuples(t1, t2):
     return (t1[0] + t2[0], t1[1] + t2[1])
-
-if __name__ == "__main__":
-    board = Board()
-    print("Player:", board.player)
-    print("Generate Moves:", list(board.generate_moves(board.player)))
-    move_list = []
-    for move in board.generate_moves(board.player, sorted_moves=True):
-        move_list.append(move)
-    print("Generate Moves Sorted:", move_list)
-    print("Generate Moves Capture:", list(board.generate_moves(board.player, capture=True)))
-    board.player = 2
-    print("Player:", board.player)
-    print("Generate Moves:", list(board.generate_moves(board.player)))
-    print("Generate Moves Sorted:", list(board.generate_moves(board.player, sorted_moves=True)))
-    print("Generate Moves Capture:", list(board.generate_moves(board.player, capture=True)))

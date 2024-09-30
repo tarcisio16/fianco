@@ -24,8 +24,8 @@ clock = pygame.time.Clock()
 # Initialize game state
 chessboard = Board()
 #engine = Engine(chessboard, 1)
-engine = ImprovedEngine(chessboard, 1)
-engine1 = ImprovedEngine(chessboard, 2)
+engine = ImprovedEngine(chessboard, 2)
+#engine1 = ImprovedEngine(chessboard, 1)
 selected_piece = None
 game_over = False
 black_time = []
@@ -46,16 +46,16 @@ def draw_labels():
     player_message = f"Player {chessboard.player}'s turn"
     screen.blit(font.render(player_message, True, BLACK_COLOR), (WIDTH // 2 - FONT_SIZE, HEIGHT - FONT_SIZE - 10))
 
-    global engine, engine1
+    global engine
     valuewhite = chessboard.evaluation_function(WHITE)
     valueblack = chessboard.evaluation_function(BLACK)
     values = f"White: {valuewhite} Black: {valueblack}"
     screen.blit(font.render(values, True, BLACK_COLOR), (WIDTH // 2 - FONT_SIZE, HEIGHT - FONT_SIZE - 40))
     
-    hits = f"Hits b/w: {engine1.hits}, {engine.hits}"
-    nodes = f"Nodes  b/w: {engine1.nodes}, {engine.nodes}"
+    hits = f"Hits b/w: {engine.hits}, {engine.hits}"
+    nodes = f"Nodes  b/w: {engine.nodes}, {engine.nodes}"
     movetimes = f"Move times b/w: {round(sum(white_time),2)}, {round(sum(black_time),2)}"
-    evals = f"Evaluations b/w: {engine1.evaluation}, {engine.evaluation}"
+    evals = f"Evaluations b/w: {engine.evaluation}, {engine.evaluation}"
     
     screen.blit(font.render(hits, True, BLACK_COLOR), (WIDTH -500 , HEIGHT - FONT_SIZE - 70))
     screen.blit(font.render(nodes, True, BLACK_COLOR), (WIDTH - 500 , HEIGHT - 2 * FONT_SIZE - 70))
@@ -92,7 +92,6 @@ def reset_game():
     global chessboard, selected_piece, game_over
     chessboard = Board()
     engine = Engine(chessboard, 1)
-    engine1 = Engine(chessboard, 2)
     selected_piece = None
     game_over = False
 
@@ -145,10 +144,9 @@ def main_game_loop():
 
             elif chessboard.player == 2 and game_over == 0 :
                 start = time.time()
-                move = engine1.negamax_iterative_deepening_root(chessboard, 5, -1000000, 1000000)
+                move = engine.negamax_iterative_deepening_root(chessboard, 5, -1000000, 1000000)
                 end = time.time()
                 white_time.append(end-start)
-                print(move)
                 chessboard.move(chessboard.player, move[0], move[1], move[2], move[3])
                 chessboard.player ^= 3
                 

@@ -61,7 +61,7 @@ class QuiescentEngine(Engine):
                 continue
             self.board.move(self.player_at_turn, *move)
             self.player_at_turn ^= 3
-            zobrist_move = self.board.zobrist_move(zobrist, self.player_at_turn  , move)
+            zobrist_move = self.board.zobrist_move(zobrist, self.player_at_turn , move)
             value = -self.negamax(depth - 1, -beta, -alpha, zobrist_move)
             self.player_at_turn ^= 3
             self.board.undomove(self.player_at_turn, *move)
@@ -94,7 +94,7 @@ class QuiescentEngine(Engine):
         return best_value
             
     
-    def negamax_iterative_deepening_root(self, board, max_depth, alpha, beta):
+    def negamax_iterative_deepening_root(self, board, max_depth, alpha, beta, opening_book = None):
         self.next_turn()
         best_move = None
         olda = alpha
@@ -128,15 +128,18 @@ class QuiescentEngine(Engine):
                     return best_move
         
         for depth in range(2, max_depth + 1):
+            new_depth = depth
             best_value, current_best_move = -100000, None
-            for move in board.generate_moves(self.player):
+            for move in board.generate_moves(self.player, sorted_moves=True):
                 if move == ttmove:
                     continue
+                if (move[0] == 8 and self.player == WHITE) or (move[0] == 1 and self.player == BLACK):
+                    new_depth += 2
                 alpha = max(alpha, best_value)
                 board.move(self.player, *move)
                 self.player_at_turn ^= 3    
                 zobrist_move = board.zobrist_move(zobrist, self.player_at_turn, move)
-                value = -self.negamax(depth - 1, -beta, -alpha, zobrist_move)
+                value = -self.negamax(new_depth - 1, -beta, -alpha, zobrist_move)
                 self.player_at_turn ^= 3
                 board.undomove(self.player, *move)
 
