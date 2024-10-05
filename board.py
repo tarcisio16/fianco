@@ -12,6 +12,7 @@ POSITIONAL_BONUS = 5
 SECONDLASTBONUS = 100
 PIECE_BONUS = 20
 
+
 class Board:
 
     def __init__(self):
@@ -69,11 +70,20 @@ class Board:
             opponent_pieces.add(captured)
                 
     def checkwin(self):
-        if self.white_pieces.intersection(WINNING_WHITES) or len(self.black_pieces) == 0:
+        # if self.player == WHITE:
+        #     for y,x in self.white_pieces:
+        #         if y == 6 and (self.black_pieces.intersection({((7,x-1)),((7,x+1))})) and not self.black_pieces.intersection({(8,x+2),(8,x-2)}):
+        #             return 1
+        # else:
+        #     for y,x in self.black_pieces:
+        #         if y == 1 and (self.white_pieces.intersection({((0,x-1)),((0,x+1))})) and not self.white_pieces.intersection({(0,x+2),(0,x-2)}):
+        #             return 2
+        if self.white_pieces.intersection(WINNING_WHITES):
             return 1
-        elif self.black_pieces.intersection(WINNING_BLACK) or len(self.white_pieces) == 0:
+        elif self.black_pieces.intersection(WINNING_BLACK):
             return 2
         return 0
+
 
     def zobrist_hash(self, player):
         key = np.uint64(0)
@@ -114,131 +124,14 @@ class Board:
             np_board[y][x] = "B"
         return "\n".join(" ".join(row) for row in np_board)
 
-    def can_capture(self, player, piece):
-        for capture_offset in CAPTURED_PIECE_OFFSET[player]:
-            captured_piece = add_tuples(piece, capture_offset)
-            new_pos = add_tuples(piece, add_tuples(capture_offset, capture_offset))
-            if 0 <= new_pos[0] < BOARD_SIZE and 0 <= new_pos[1] < BOARD_SIZE and captured_piece in self.black_pieces and new_pos not in self.white_pieces and new_pos not in self.black_pieces:
-                return True
-        return False
-        
-    def obstacles(self, player, piece,empty_squares):
-        y,x = piece
-        if x == 0:
-            if player == WHITE:
-                if y == 7:
-                    return empty_squares.intersection({(8, 0), (8, 1)})
-                if y == 6:
-                    return empty_squares.intersection({(8, 0), (8, 1), (8, 2),(7,0),(7,1)})
-                if y == 5:
-                    return empty_squares.intersection({(8, 0), (8, 1), (8, 2),(8,3), (7,0),(7,1),(7,2),(6,0),(6,1)})
-            if player == BLACK:
-                if y == 1:
-                    return empty_squares.intersection({(0, 0), (0, 1)})
-                if y == 2:
-                    return empty_squares.intersection({(0, 0), (0, 1), (0, 2),(1,0),(1,1)})
-                if y == 3:
-                    return empty_squares.intersection({(0, 0), (0, 1), (0, 2),(0,3), (1,0),(1,1),(1,2),(2,0),(2,1)})
-        if x == 1:
-            if player == WHITE:
-                if y == 7:
-                    return empty_squares.intersection({(8,0),(8, 1), (8, 2)})
-                if y == 6:
-                    return empty_squares.intersection({(8,0),(8, 1), (8, 2), (8, 3), (7,0), (7, 1), (7, 2)})
-                if y == 5:
-                    return empty_squares.intersection({(8,0),(8, 1), (8, 2), (8, 3), (8, 4), (7,0), (7, 1), (7, 2), (7, 3), (6,0), (6, 1), (6, 2)})
-            if player == BLACK:
-                if y == 1:
-                    return empty_squares.intersection({(0, 0), (0, 1), (0, 2)})
-                if y == 2:
-                    return empty_squares.intersection({(0,0),(0, 1), (0, 2), (0, 3),(1,0),(1,1),(1,2)})
-                if y == 3:
-                    return empty_squares.intersection({(0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (1, 0), (1, 1), (1, 2), (1, 3), (2, 0), (2, 1), (2, 2)})
-        if x == 2:
-            if player == WHITE:
-                if y == 7:
-                    return empty_squares.intersection({(8,1),(8, 2), (8, 3)})
-                if y == 6:
-                    return empty_squares.intersection({(8,0),(8,1),(8, 2), (8, 3), (8, 4), (7,1), (7, 2), (7, 3)})
-                if y == 5:
-                    return empty_squares.intersection({(8,0),(8, 1), (8, 2), (8, 3), (8, 4), (8, 5), (7, 0), (7, 1), (7, 2), (7, 3), (7, 4), (6, 1), (6, 2), (6, 3)})
-            if player == BLACK:
-                if y == 1:
-                    return empty_squares.intersection({(0, 1), (0, 2), (0, 3)})
-                if y == 2:
-                    return empty_squares.intersection({(0,0),(0,1),(0, 2), (0, 3), (0, 4),(1,1),(1,2),(1,3)})
-                if y == 3:
-                    return empty_squares.intersection({(0,0),(0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (1,0), (1, 1), (1, 2), (1, 3),(1,4) ,(2,1), (2, 2), (2, 3)})
-        if 2 < x < 6:
-            if player == WHITE:
-                if y == 7:
-                    return empty_squares.intersection({(8, x), (8, x+1), (8, x-1)})
-                if y == 6:
-                    return empty_squares.intersection({(8, x), (8, x+1), (8, x-1), (8, x-2), (8, x+2), (7, x), (7, x+1), (7, x-1)})
-                if y == 5:
-                    return empty_squares.intersection({(8, x), (8, x+1), (8, x-1),(8,x-2), (8,x+2), (8,x-3), (8,x+3), (7, x), (7, x+1), (7, x-1), (7, x-2), (7, x+2), (6, x), (6, x+1), (6, x-1)})
-            if player == BLACK:
-                if y == 1:
-                    return empty_squares.intersection({(0, x), (0, x+1), (0, x-1)})
-                if y == 2:
-                    return empty_squares.intersection({(0, x), (0, x+1), (0, x-1), (0, x-2), (0, x+2), (1, x), (1, x+1), (1, x-1)})
-                if y == 3:
-                    return empty_squares.intersection({(0, x), (0, x+1), (0, x-1),(0,x-2), (0,x+2), (0,x-3), (0,x+3), (1, x), (1, x+1), (1, x-1), (1, x-2), (1, x+2), (2, x), (2, x+1), (2, x-1)})
-        if x == 7:
-            if player == WHITE:
-                if y == 7:
-                    return empty_squares.intersection({(8,5),(8, 6), (8, 7)})
-                if y == 6:
-                    return empty_squares.intersection({(8,5),(8, 6), (8, 7), (8, 8), (7, 6), (7, 7), (7, 8)})
-                if y == 5:
-                    return empty_squares.intersection({((8,8),(8,7),(8,6),(8,5),(8,4),(7,8),(7,7),(7,6),(7,5),(6,8),(6,7),(6,6))})
-            if player == BLACK:
-                if y == 1:
-                    return empty_squares.intersection({(0, 5), (0, 6), (0, 7)})
-                if y == 2:
-                    return empty_squares.intersection({(0, 5), (0, 6), (0, 7), (0, 8), (1, 6), (1, 7), (1, 8)})
-                if y == 3:
-                    return empty_squares.intersection({(0,4),(0, 5), (0, 6), (0, 7), (0, 8), (1,5),(1, 6), (1, 7), (1, 8), (2, 7), (2, 8), (2, 6)})
-
-        if x == 6:
-            if player == WHITE:
-                if y == 7:
-                    return empty_squares.intersection({(8,5),(8, 6), (8, 7)})
-                if y == 6:
-                    return empty_squares.intersection({(8,4),(8, 5), (8, 6), (8, 7), (8, 8), (7, 5), (7, 6), (7, 7)})
-                if y == 5:
-                    return empty_squares.intersection({(8,3),(8, 4), (8, 5), (8, 6), (8, 7), (8, 8), (7, 4), (7, 5), (7, 6), (7, 7),(7,8), (6, 4), (6, 5), (6, 6)})
-            if player == BLACK:
-                if y == 1:
-                    return empty_squares.intersection({(0, 4), (0, 5), (0, 6)})
-                if y == 2:
-                    return empty_squares.intersection({(0, 4), (0, 5), (0, 6), (0, 7), (1, 5), (1, 6), (1, 7)})
-                if y == 3:
-                    return empty_squares.intersection({(0,3),(0, 4), (0, 5), (0, 6), (0, 7), (0, 8), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (2, 5), (2, 6), (2, 7)})
-        if x == 8:
-            if player == WHITE:
-                if y == 7:
-                    return empty_squares.intersection({(8, 8), (8, 7)})
-                if y == 6:
-                    return empty_squares.intersection({(8, 8), (8, 7), (8, 6),(7,8),(7,7)})
-                if y == 5:
-                    return empty_squares.intersection({(8, 8), (8, 7), (8, 6),(8,5), (7,8),(7,7),(7,6),(6,8),(6,7)})
-            if player == BLACK:
-                if y == 1:
-                    return empty_squares.intersection({(0, 8), (0, 7)})
-                if y == 2:
-                    return empty_squares.intersection({(0, 8), (0, 7), (0, 6),(1,8),(1,7)})
-                if y == 3:
-                    return empty_squares.intersection({(0, 8), (0, 7), (0, 6),(0,5), (1,8),(1,7),(1,6),(2,8),(2,7)})
-
     def evaluation_function(self, player):
         empty_squares = ALL_SQUARES - self.white_pieces - self.black_pieces
         white_score = sum(
-            y * POSITIONAL_BONUS + (FIANCO_BONUS if x in (0, 8) else 0) + (1000000 if y == 8 else 0) + (SECONDLASTBONUS if y == 7 else 0) + (FIANCO_BONUS // 2 if x in (1, 7) else 0) #+ 1000000 if not self.obstacles(WHITE, (y, x), empty_squares) else 0
+            y * POSITIONAL_BONUS + (FIANCO_BONUS if x in (0, 8) else 0) + (1000000 if y == 8 else 0) + (SECONDLASTBONUS if y == 7 else 0) + (FIANCO_BONUS // 2 if x in (1, 7) else 0)
             for y, x in self.white_pieces
         )
         black_score = sum(
-            (BOARD_SIZE - y - 1) * POSITIONAL_BONUS + (FIANCO_BONUS if x in (0, 8) else 0) + (1000000 if y == 0 else 0) + (SECONDLASTBONUS if y == 1 else 0) + (FIANCO_BONUS // 2 if x in (1, 7) else 0) #+ 1000000 if not self.obstacles(BLACK, (y, x), empty_squares) else 0
+            (BOARD_SIZE - y - 1) * POSITIONAL_BONUS + (FIANCO_BONUS if x in (0, 8) else 0) + (1000000 if y == 0 else 0) + (SECONDLASTBONUS if y == 1 else 0) + (FIANCO_BONUS // 2 if x in (1, 7) else 0) 
             for y, x in self.black_pieces
         )
 

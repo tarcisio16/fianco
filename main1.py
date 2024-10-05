@@ -13,8 +13,6 @@ BLACK_COLOR = (0, 0, 0)
 GREY = (200, 200, 200)
 RED_COLOR = (255, 0, 0)
 
-
-
 # Initialize pygame and screen dimensions
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -23,18 +21,22 @@ font = pygame.font.SysFont(None, FONT_SIZE)
 font2 = pygame.font.SysFont(None, FONT_SIZE // 2)
 clock = pygame.time.Clock()
 
+PLAYER = BLACK
 # Initialize game state
 chessboard = Board()
-#engine = Engine(chessboard, 1)
-engine = ImprovedEngine(chessboard, 2)
-#engine1 = ImprovedEngine(chessboard, 1)
+engine = ImprovedEngine(chessboard, PLAYER)
 selected_piece = None
 game_over = False
 black_time = []
 white_time = []
 previous_moves = []
+total_nodes_visited = 0
+total_hits = 0
+
+
 
 def draw_grid():
+    # Draw the grid lines
     for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):
         pygame.draw.line(screen, BLACK_COLOR, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)
     for y in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):
@@ -149,7 +151,7 @@ def main_game_loop():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN and not game_over and chessboard.player == 1:
+            elif event.type == pygame.MOUSEBUTTONDOWN and not game_over and chessboard.player == 3 - PLAYER:
                 pos = pygame.mouse.get_pos()
                 cell = get_cell_at_position(pos)
                 if cell:
@@ -169,7 +171,7 @@ def main_game_loop():
 
             elif chessboard.player == 2 and game_over == 0 :
                 start = time.time()
-                move = engine.negamax_iterative_deepening_root(chessboard, 12, -1000000, 1000000)
+                move = engine.negamax_iterative_deepening_root(chessboard, 12, -1000000, 1000000, 8)
                 end = time.time()
                 white_time.append(end-start)
                 try:
@@ -189,7 +191,6 @@ def main_game_loop():
         handle_input()
 
         screen.fill(GREY)
-        
         draw_labels()
         draw_pieces()
         draw_grid()
@@ -204,6 +205,3 @@ def main_game_loop():
 
 if __name__ == "__main__":
     main_game_loop()
-
-
-

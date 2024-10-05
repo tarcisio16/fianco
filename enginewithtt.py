@@ -9,8 +9,8 @@ logging.basicConfig(filename='engine.log', filemode='w', level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-TTSIZE = 2**27
-TTMASK = 0x7FFFFFF
+TTSIZE = 2**26
+TTMASK = 0x3FFFFFF
 class TTengine():
     
     def __init__(self, board, player) -> None:
@@ -44,6 +44,3 @@ class TTengine():
     def next_turn(self):
         self.turn += 1
         self.hits = self.nodes = 0
-
-
-

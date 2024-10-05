@@ -17,10 +17,10 @@ if __name__ == "__main__":
             if board.checkwin():
                 print("Player 1 wins!")
                 break
-            move1 = engine1.negamax_iterative_deepening_root(board, 5, -1000000, 1000000)
+            move1 = input("Enter move: ").split()
             board.move(board.player, move1[0], move1[1], move1[2], move1[3])
             print(board)
             if board.checkwin():
                 print("Player 2 wins!")
                 break
-            board.player = 3 - board.player
+            board.player = 3 - board.player 

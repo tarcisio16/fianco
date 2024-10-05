@@ -55,6 +55,7 @@ def draw_labels():
     values = f"White: {valuewhite} Black: {valueblack}"
     screen.blit(font.render(values, True, BLACK_COLOR), (WIDTH // 2 - FONT_SIZE, HEIGHT - FONT_SIZE - 40))
 
+    depth = f"Depth b/w: {engine1.depth}, {engine.depth}"
     collisions = f"Collisions b/w: {engine.collisions}, {engine.collisions}"
     hits = f"Hits b/w: {engine.hits}, {engine.hits}"
     nodes = f"Nodes  b/w: {engine.nodes}, {engine.nodes}"
@@ -66,6 +67,7 @@ def draw_labels():
     screen.blit(font.render(nodes, True, BLACK_COLOR), (WIDTH - 500 , HEIGHT - 2 * FONT_SIZE - 70))
     screen.blit(font.render(movetimes, True, BLACK_COLOR), (WIDTH -500 , HEIGHT - 3 * FONT_SIZE - 70))
     screen.blit(font.render(evals, True, BLACK_COLOR), (WIDTH -500 , HEIGHT - 4 * FONT_SIZE - 70))
+    screen.blit(font.render(depth, True, BLACK_COLOR), (WIDTH -500 , HEIGHT - 6 * FONT_SIZE - 70))
 
 def draw_pieces():
     for pos in chessboard.white_pieces:
@@ -147,7 +149,7 @@ def main_game_loop():
 
             elif chessboard.player == 1 and game_over == 0 and pygame.mouse.get_pressed()[0]:
                 start = time.time()
-                move = engine1.negamax_iterative_deepening_root(chessboard, 4, -1000000, 1000000)
+                move = engine1.negamax_iterative_deepening_root(chessboard, 12, -1000000, 1000000, max_time=3)
                 end = time.time()
                 black_time.append(end-start)
                 chessboard.move(chessboard.player, move[0], move[1], move[2], move[3])
@@ -157,9 +159,9 @@ def main_game_loop():
 
                     
 
-            elif chessboard.player == 2 and game_over == 0 and pygame.mouse.get_pressed()[0]:
+            elif chessboard.player == 2 and game_over == 0 :
                 start = time.time()
-                move = engine.negamax_iterative_deepening_root(chessboard, 8, -1000000, 1000000)
+                move = engine.negamax_iterative_deepening_root(chessboard, 12, -1000000, 1000000, max_time=3)
                 end = time.time()
                 white_time.append(end-start)
                 chessboard.move(chessboard.player, move[0], move[1], move[2], move[3])
