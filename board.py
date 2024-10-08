@@ -5,17 +5,10 @@ from collections import deque
 LATERAL_DIRECTIONS = {(0, -1), (0, 1)}
 FORWARD_DIRECTIONS = {WHITE: (1, 0), BLACK: (-1, 0)}
 CAPTURED_PIECE_OFFSET = {WHITE: [(1, 1), (1, -1)], BLACK: [(-1, 1), (-1, -1)]}
-ALL_SQUARES = set((y, x) for y in range(BOARD_SIZE) for x in range(BOARD_SIZE))
         
-FIANCO_BONUS = 8
-POSITIONAL_BONUS = 5
-SECONDLASTBONUS = 100
-PIECE_BONUS = 20
-
-
 class Board:
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.player = WHITE
         self.legalmoves = set()
         self.white_pieces = set({(0,0),(0,1),(0,2),(0,3),(0,4),(0,5),(0,6),(0,7),(0,8),(1,1),(1,7),(2,2),(2,6),(3,3),(3,5)})
@@ -23,11 +16,12 @@ class Board:
         np.random.seed(42069)
         self.zobrist = np.random.randint(0, (2**63) -1, size=(BOARD_SIZE, BOARD_SIZE, 2), dtype=np.uint64) 
         self.zobrist_player = np.random.randint(0, (2**63) -1, size=(2), dtype=np.uint64)
+        
 
 
-    def generate_moves(self, player, sorted_moves=False, capture=False):
+    def generate_moves(self, player, sorted_moves=False, capture=False, reverse = True):
         if sorted_moves:
-            current_pieces = sorted(self.white_pieces, key=lambda item: item[0], reverse=True) if player == WHITE else sorted(self.black_pieces, key=lambda item: item[0], reverse=True)
+            current_pieces = sorted(self.white_pieces, key=lambda item: item[0], reverse=reverse) if player == WHITE else sorted(self.black_pieces, key=lambda item: item[0], reverse=not reverse)
         else:
             current_pieces = self.white_pieces if player == WHITE else self.black_pieces
         opponent_pieces = self.black_pieces if player == WHITE else self.white_pieces
@@ -70,14 +64,6 @@ class Board:
             opponent_pieces.add(captured)
                 
     def checkwin(self):
-        # if self.player == WHITE:
-        #     for y,x in self.white_pieces:
-        #         if y == 6 and (self.black_pieces.intersection({((7,x-1)),((7,x+1))})) and not self.black_pieces.intersection({(8,x+2),(8,x-2)}):
-        #             return 1
-        # else:
-        #     for y,x in self.black_pieces:
-        #         if y == 1 and (self.white_pieces.intersection({((0,x-1)),((0,x+1))})) and not self.white_pieces.intersection({(0,x+2),(0,x-2)}):
-        #             return 2
         if self.white_pieces.intersection(WINNING_WHITES):
             return 1
         elif self.black_pieces.intersection(WINNING_BLACK):
@@ -124,20 +110,16 @@ class Board:
             np_board[y][x] = "B"
         return "\n".join(" ".join(row) for row in np_board)
 
-    def evaluation_function(self, player):
-        empty_squares = ALL_SQUARES - self.white_pieces - self.black_pieces
-        white_score = sum(
-            y * POSITIONAL_BONUS + (FIANCO_BONUS if x in (0, 8) else 0) + (1000000 if y == 8 else 0) + (SECONDLASTBONUS if y == 7 else 0) + (FIANCO_BONUS // 2 if x in (1, 7) else 0)
-            for y, x in self.white_pieces
-        )
-        black_score = sum(
-            (BOARD_SIZE - y - 1) * POSITIONAL_BONUS + (FIANCO_BONUS if x in (0, 8) else 0) + (1000000 if y == 0 else 0) + (SECONDLASTBONUS if y == 1 else 0) + (FIANCO_BONUS // 2 if x in (1, 7) else 0) 
-            for y, x in self.black_pieces
-        )
+    def can_capture(self,player,piece):        
+        if any(move[:2] == piece for move in self.generate_moves(player, capture=True)):    return True
+        return False
 
-        return white_score - black_score if player == WHITE else black_score - white_score
-
+    def menace(self,player):
+        opponent_secondlastrow = self.black_pieces.intersection(ROW1) if player == WHITE else self.white_pieces.intersection(ROW7)
+        opponent_thirdlastrow = self.black_pieces.intersection(ROW2) if player == WHITE else self.white_pieces.intersection(ROW6)
+        return len(opponent_secondlastrow) > 0 or len(opponent_thirdlastrow) > 0
+        
     
-
 def add_tuples(t1, t2):
     return (t1[0] + t2[0], t1[1] + t2[1])
+

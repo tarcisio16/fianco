@@ -1,10 +1,7 @@
 import pygame
 import sys
 from board import Board
-import traceback
 from parameters import *
-#from enginewithtt import TTengine as Engine
-#from improvedengine import ImprovedEngine
 import time
 from quiescentengine import QuiescentEngine as ImprovedEngine
 
@@ -13,6 +10,15 @@ BLACK_COLOR = (0, 0, 0)
 GREY = (200, 200, 200)
 
 
+FIANCO_BONUS = 20
+POSITIONAL_BONUS = 20
+SECONDLASTBONUS = 10
+THIRDANDCAPTURE_BONUS = 0
+PIECE_BONUS = 5
+
+
+feature_set = {"FIANCO_BONUS": FIANCO_BONUS, "POSITIONAL_BONUS": POSITIONAL_BONUS, "SECONDLASTBONUS": SECONDLASTBONUS, "THIRDANDCAPTURE_BONUS": THIRDANDCAPTURE_BONUS, "PIECE_BONUS": PIECE_BONUS}
+feature_set1 = {'FIANCO_BONUS': 20, 'POSITIONAL_BONUS': 20, 'SECONDLASTBONUS': 20, 'THIRDANDCAPTURE_BONUS': 0, 'PIECE_BONUS': 10}
 
 
 
@@ -27,8 +33,8 @@ clock = pygame.time.Clock()
 # Initialize game state
 chessboard = Board()
 #engine = Engine(chessboard, 1)
-engine = ImprovedEngine(chessboard, 2)
-engine1 = ImprovedEngine(chessboard, 1)
+engine = ImprovedEngine(chessboard, 2, feature_set1,24)
+engine1 = ImprovedEngine(chessboard, 1, feature_set, 24)
 selected_piece = None
 game_over = False
 black_time = []
@@ -43,24 +49,24 @@ def draw_grid():
 
 def draw_labels():
     for i in range(BOARD_SIZE):
-        screen.blit(font.render(LETTERS[i], True, BLACK_COLOR), (i * CELL_SIZE + MARGIN, FONT_SIZE // 2))
+        screen.blit(font.render(LETTERS[i], True, BLACK_COLOR), (i * CELL_SIZE + MARGIN, FONT_SIZE  ))
         screen.blit(font2.render(str(i + 1), True, BLACK_COLOR), (10, MARGIN + i * CELL_SIZE))
 
     player_message = f"Player {chessboard.player}'s turn"
     screen.blit(font.render(player_message, True, BLACK_COLOR), (WIDTH // 2 - FONT_SIZE, HEIGHT - FONT_SIZE - 10))
 
     global engine
-    valuewhite = chessboard.evaluation_function(WHITE)
-    valueblack = chessboard.evaluation_function(BLACK)
+    valueblack = engine.evaluation_function(WHITE)
+    valuewhite= -valueblack
     values = f"White: {valuewhite} Black: {valueblack}"
     screen.blit(font.render(values, True, BLACK_COLOR), (WIDTH // 2 - FONT_SIZE, HEIGHT - FONT_SIZE - 40))
 
-    depth = f"Depth b/w: {engine1.depth}, {engine.depth}"
     collisions = f"Collisions b/w: {engine.collisions}, {engine.collisions}"
     hits = f"Hits b/w: {engine.hits}, {engine.hits}"
     nodes = f"Nodes  b/w: {engine.nodes}, {engine.nodes}"
     movetimes = f"Move times b/w: {round(sum(white_time),2)}, {round(sum(black_time),2)}"
     evals = f"Evaluations b/w: {engine.evaluation}, {engine.evaluation}"
+    depth = f"Depth: {engine.depth}"
     
     screen.blit(font.render(collisions, True, BLACK_COLOR), (WIDTH -500 , HEIGHT - 5 * FONT_SIZE - 70))
     screen.blit(font.render(hits, True, BLACK_COLOR), (WIDTH -500 , HEIGHT - FONT_SIZE - 70))
@@ -96,11 +102,15 @@ def get_cell_at_position(pos):
     return (y, x) if 0 <= x < BOARD_SIZE and 0 <= y < BOARD_SIZE else None
 
 def reset_game():
-    global chessboard, selected_piece, game_over
+    global chessboard, selected_piece, game_over, engine, engine1
     chessboard = Board()
-    engine = ImprovedEngine(chessboard, 2)
+    fs = engine.feature_set
+    fs1 = engine1.feature_set
+    engine = ImprovedEngine(chessboard, 2, fs1, 24)
+    engine1 = ImprovedEngine(chessboard, 1, fs, 24)
     selected_piece = None
     game_over = False
+    
 
 def check_game_over():
     return chessboard.checkwin()
@@ -149,7 +159,7 @@ def main_game_loop():
 
             elif chessboard.player == 1 and game_over == 0 and pygame.mouse.get_pressed()[0]:
                 start = time.time()
-                move = engine1.negamax_iterative_deepening_root(chessboard, 12, -1000000, 1000000, max_time=3)
+                move = engine1.negamax_iterative_deepening_root(chessboard, 6, -1000000, 1000000, max_time=3)
                 end = time.time()
                 black_time.append(end-start)
                 chessboard.move(chessboard.player, move[0], move[1], move[2], move[3])
@@ -161,7 +171,7 @@ def main_game_loop():
 
             elif chessboard.player == 2 and game_over == 0 :
                 start = time.time()
-                move = engine.negamax_iterative_deepening_root(chessboard, 12, -1000000, 1000000, max_time=3)
+                move = engine.negamax_iterative_deepening_root(chessboard, 6, -1000000, 1000000, max_time=3)
                 end = time.time()
                 white_time.append(end-start)
                 chessboard.move(chessboard.player, move[0], move[1], move[2], move[3])
@@ -179,9 +189,8 @@ def main_game_loop():
         draw_pieces()
         draw_moves()
 
-        game_over_message = check_game_over()
-        if game_over_message:
-            screen.blit(font.render(game_over_message, True, BLACK_COLOR), (WIDTH // 2 - FONT_SIZE, HEIGHT // 2))
+        if check_game_over():
+            screen.blit(font.render(f"Player {check_game_over()} won", True, BLACK_COLOR), (WIDTH // 2 - FONT_SIZE, HEIGHT // 2))
 
         pygame.display.flip()
         clock.tick(30)

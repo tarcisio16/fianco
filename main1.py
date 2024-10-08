@@ -3,8 +3,6 @@ import sys
 from board import Board
 import traceback
 from parameters import *
-#from enginewithtt import TTengine as Engine
-#from improvedengine import ImprovedEngine
 import time
 from quiescentengine import QuiescentEngine as ImprovedEngine
 
@@ -24,7 +22,7 @@ clock = pygame.time.Clock()
 PLAYER = BLACK
 # Initialize game state
 chessboard = Board()
-engine = ImprovedEngine(chessboard, PLAYER)
+engine = ImprovedEngine(chessboard, PLAYER, transposition_table_size=28)
 selected_piece = None
 game_over = False
 black_time = []
@@ -66,8 +64,8 @@ def draw_labels():
     screen.blit(font.render(player_message, True, BLACK_COLOR), (WIDTH // 2 - FONT_SIZE, HEIGHT - FONT_SIZE - 10))
 
     global engine
-    valuewhite = chessboard.evaluation_function(WHITE)
-    valueblack = chessboard.evaluation_function(BLACK)
+    valueblack = engine.evaluation_function(WHITE)
+    valuewhite= -valueblack
     values = f"White: {valuewhite} Black: {valueblack}"
     screen.blit(font.render(values, True, BLACK_COLOR), (WIDTH // 2 - FONT_SIZE, HEIGHT - FONT_SIZE - 40))
 
@@ -169,9 +167,9 @@ def main_game_loop():
                 
                     
 
-            elif chessboard.player == 2 and game_over == 0 :
+            elif chessboard.player == PLAYER and game_over == 0 :
                 start = time.time()
-                move = engine.negamax_iterative_deepening_root(chessboard, 12, -1000000, 1000000, 8)
+                move = engine.negamax_iterative_deepening_root(chessboard, 10, max_time=4)
                 end = time.time()
                 white_time.append(end-start)
                 try:
@@ -184,10 +182,6 @@ def main_game_loop():
                     sys.exit()
                 
                 chessboard.player ^= 3
-                
-                    
-                    
-
         handle_input()
 
         screen.fill(GREY)
