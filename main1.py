@@ -69,18 +69,12 @@ def draw_labels():
     values = f"White: {valuewhite} Black: {valueblack}"
     screen.blit(font.render(values, True, BLACK_COLOR), (WIDTH // 2 - FONT_SIZE, HEIGHT - FONT_SIZE - 40))
 
-    collisions = f"Collisions b/w: {engine.collisions}, {engine.collisions}"
-    hits = f"Hits b/w: {engine.hits}, {engine.hits}"
     nodes = f"Nodes  b/w: {engine.nodes}, {engine.nodes}"
     movetimes = f"Move times b/w: {round(sum(white_time),2)}, {round(sum(black_time),2)}"
-    evals = f"Evaluations b/w: {engine.evaluation}, {engine.evaluation}"
     depth = f"Depth: {engine.depth}"
     
-    screen.blit(font.render(collisions, True, BLACK_COLOR), (WIDTH -500 , HEIGHT - 5 * FONT_SIZE - 70))
-    screen.blit(font.render(hits, True, BLACK_COLOR), (WIDTH -500 , HEIGHT - FONT_SIZE - 70))
     screen.blit(font.render(nodes, True, BLACK_COLOR), (WIDTH - 500 , HEIGHT - 2 * FONT_SIZE - 70))
     screen.blit(font.render(movetimes, True, BLACK_COLOR), (WIDTH -500 , HEIGHT - 3 * FONT_SIZE - 70))
-    screen.blit(font.render(evals, True, BLACK_COLOR), (WIDTH -500 , HEIGHT - 4 * FONT_SIZE - 70))
     screen.blit(font.render(depth, True, BLACK_COLOR), (WIDTH -500 , HEIGHT - 6 * FONT_SIZE - 70))
 
 def draw_pieces():
@@ -169,7 +163,7 @@ def main_game_loop():
 
             elif chessboard.player == PLAYER and game_over == 0 :
                 start = time.time()
-                move = engine.negamax_iterative_deepening_root(chessboard, 10, max_time=4)
+                move = engine.negamax_iterative_deepening_root(chessboard, 10, max_time=10)
                 end = time.time()
                 white_time.append(end-start)
                 try:

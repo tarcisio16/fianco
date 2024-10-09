@@ -3,11 +3,6 @@ from board import Board
 from parameters import *
 import time
 
-feature_set = {"FIANCO_BONUS": 10,
-                "POSITIONAL_BONUS": 2,
-                "SECONDLASTBONUS": 10,
-                "THIRDANDCAPTURE_BONUS": 10,
-                 "PIECE_BONUS": 5}
 class TTengine():
     
     def __init__(self, board, player,feature_set, transposition_table_size = 26) -> None:
@@ -24,7 +19,6 @@ class TTengine():
         self.fiancobonus = feature_set["FIANCO_BONUS"]
         self.positionalbonus = feature_set["POSITIONAL_BONUS"]
         self.secondlastbonus = feature_set["SECONDLASTBONUS"]
-        self.thirdandcapturebonus = feature_set["THIRDANDCAPTURE_BONUS"]
         self.piecebonus = feature_set["PIECE_BONUS"]
         self.feature_set = feature_set
         
@@ -62,79 +56,41 @@ class TTengine():
         return time.time() - start > max_time
     
     def evaluation_function(self, player):
+        # Precompute constants
+        positional_bonus = self.positionalbonus
+        fianco_bonus = self.fiancobonus
+        piece_bonus = self.piecebonus
+        second_last_bonus = self.secondlastbonus
+        board_size = BOARD_SIZE
+
+        # Optimize the scoring function
         def calculate_score(pieces, is_white):
             score = 0
             for y, x in pieces:
-                # Calculate base positional score
-                positional_score = (y * self.positionalbonus) if is_white else ((BOARD_SIZE - y - 1) * self.positionalbonus)
+                # Calculate base positional score with reduced conditional checks
+                if is_white:
+                    positional_score = (y + 1) * positional_bonus
+                    if y == 7:
+                        positional_score += second_last_bonus
+                else:
+                    positional_score = (board_size - y) * positional_bonus
+                    if y == 1:
+                        positional_score += second_last_bonus
 
-                # Add specific bonuses
+                # Fianco bonus for edge columns
                 if x in (0, 8):
-                    positional_score += self.fiancobonus
-                if y == (7 if is_white else 1):
-                    positional_score += self.secondlastbonus    
-                score += positional_score 
+                    positional_score += fianco_bonus
+
+                score += positional_score
             return score
 
-        
-        white_score = calculate_score(self.board.white_pieces, True)
-        white_score += self.piecebonus * len(self.board.white_pieces)
-        black_score = calculate_score(self.board.black_pieces, False)
-        black_score += self.piecebonus * len(self.board.black_pieces) 
-        
+        # Calculate scores for both players
+        white_score = calculate_score(self.board.white_pieces, True) 
+        black_score = calculate_score(self.board.black_pieces, False) 
+
+        # Return the score difference based on the current player
         return white_score - black_score if player == WHITE else black_score - white_score
 
 def getvalue(ttvalue_packed):
     return -((ttvalue_packed >> 16) & 0xFFFFFFFFFF) if (ttvalue_packed >> 56) & 0x1 else (ttvalue_packed >> 16) & 0xFFFFFFFFFF
 
-def main():
-    # Initialize the board
-    board = Board()  # Assuming Board class is implemented correctly
-    feature_set = {
-        "FIANCO_BONUS": 5,
-        "POSITIONAL_BONUS": 10,
-        "SECONDLASTBONUS": 3,
-        "THIRDANDCAPTURE_BONUS": 10,
-        "PIECE_BONUS": 5
-    }
-    
-    # Initialize the TT engine
-    tt_engine = TTengine(board, WHITE, feature_set)
-
-    # Example zobrist hash and move
-    zobrist_hash = 0x123456789ABCDEF  # Example Zobrist hash
-    depth = 15
-    move = [4, 2, 5, 3]  # Example move (start_row, start_col, end_row, end_col)
-    value = -500
-    alpha = -100
-    beta = 100
-    
-    # Test storing in the transposition table
-    print(f"Inserting into TT: zobrist_hash={zobrist_hash}, depth={depth}, value={value}, move={move}")
-    tt_engine.store_tt(zobrist_hash, depth, value, move, alpha, beta)
-
-    # Test retrieving from the transposition table
-    retrieved_entry = tt_engine.retrieve_tt(zobrist_hash)
-    if retrieved_entry is not None:
-        # Unpack the retrieved entry
-        depth_stored = (retrieved_entry >> 60) & 0xF
-        flag_stored = (retrieved_entry >> 57) & 0x7
-        sign_stored = (retrieved_entry >> 56) & 0x1
-        value_stored = (retrieved_entry >> 16) & 0xFFFFFFFFFF
-        move_stored = [
-            (retrieved_entry >> 12) & 0xF,
-            (retrieved_entry >> 8) & 0xF,
-            (retrieved_entry >> 4) & 0xF,
-            retrieved_entry & 0xF
-        ]
-        value_stored = -(retrieved_entry >> 16) & 0xFFFFFFFFFF if (retrieved_entry >> 56) & 0x1 else (retrieved_entry >> 16) & 0xFFFFFFFFFF
-        
-        print(f"Retrieved from TT: zobrist_hash={zobrist_hash}, depth={depth_stored}, value={value_stored}, move={move_stored}")
-    else:
-        print("No entry found in TT.")
-
-    # Check for TT hits and collisions
-    print(f"TT Hits: {tt_engine.hits}, TT Collisions: {tt_engine.collisions}")
-
-if __name__ == "__main__":
-    main()
