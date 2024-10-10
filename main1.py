@@ -163,7 +163,7 @@ def main_game_loop():
 
             elif chessboard.player == PLAYER and game_over == 0 :
                 start = time.time()
-                move = engine.negamax_iterative_deepening_root(chessboard, 10, max_time=10)
+                move = engine.negamax_iterative_deepening_root(chessboard, 12, max_time=9)
                 end = time.time()
                 white_time.append(end-start)
                 try:

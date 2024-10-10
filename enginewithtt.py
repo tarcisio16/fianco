@@ -8,17 +8,14 @@ class TTengine():
     def __init__(self, board, player,feature_set, transposition_table_size = 26) -> None:
         self.board = board
         self.player = player
-        self.turn = 0
         self.player_at_turn = player
         self.tt = np.zeros((2 ** transposition_table_size, 2), dtype=np.uint64)  # 64-bit entry: |depth (4)|flag (3)|sign (1)|value (40)|move (16)|
-        self.hits = self.turn = self.nodes = 0
-        self.evaluation = 0
-        self.collisions = 0
+        self.hits = self.turn = self.nodes = self.depth = self.turn = 0
         self.mask = (1 << transposition_table_size) - 1 
-        self.depth = 0
         self.fiancobonus = feature_set["FIANCO_BONUS"]
         self.positionalbonus = feature_set["POSITIONAL_BONUS"]
         self.secondlastbonus = feature_set["SECONDLASTBONUS"]
+        self.thirdbonus = feature_set["THIRDBONUS"]
         self.piecebonus = feature_set["PIECE_BONUS"]
         self.feature_set = feature_set
         
@@ -28,7 +25,6 @@ class TTengine():
         hash = entry[0]
         if hash == zobrist:
             return int(entry[1]) 
-
         return None
 
     def store_tt(self, zobrist, depth, value, move, alpha, beta):
@@ -46,7 +42,7 @@ class TTengine():
 
     def move_negamax(self,player,move, alpha, beta, depth, zobrist):
         self.board.move(player,*move)
-        self.player_at_turn = 3 - player
+        self.player_at_turn  ^= 3
         value = -self.negamax(depth - 1, -beta, -alpha, self.board.zobrist_move(zobrist, self.player_at_turn, move))
         self.player_at_turn = player
         self.board.undomove(player,*move)
@@ -56,35 +52,34 @@ class TTengine():
         return time.time() - start > max_time
     
     def evaluation_function(self, player):
-        # Precompute constants
         positional_bonus = self.positionalbonus
         fianco_bonus = self.fiancobonus
         piece_bonus = self.piecebonus
         second_last_bonus = self.secondlastbonus
         board_size = BOARD_SIZE
 
-        # Optimize the scoring function
         def calculate_score(pieces, is_white):
             score = 0
             for y, x in pieces:
-                # Calculate base positional score with reduced conditional checks
                 if is_white:
                     positional_score = (y + 1) * positional_bonus
                     if y == 7:
                         positional_score += second_last_bonus
+                    if y == 6:
+                        positional_score += self.thirdbonus
                 else:
                     positional_score = (board_size - y) * positional_bonus
                     if y == 1:
                         positional_score += second_last_bonus
+                    if y == 2:
+                        positional_score += self.thirdbonus
 
-                # Fianco bonus for edge columns
                 if x in (0, 8):
                     positional_score += fianco_bonus
 
                 score += positional_score
             return score
 
-        # Calculate scores for both players
         white_score = calculate_score(self.board.white_pieces, True) 
         black_score = calculate_score(self.board.black_pieces, False) 
 

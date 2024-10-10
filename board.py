@@ -2,22 +2,44 @@ import numpy as np
 from parameters import *
 from collections import deque
 
-LATERAL_DIRECTIONS = {(0, -1), (0, 1)}
-FORWARD_DIRECTIONS = {WHITE: (1, 0), BLACK: (-1, 0)}
-CAPTURED_PIECE_OFFSET = {WHITE: [(1, 1), (1, -1)], BLACK: [(-1, 1), (-1, -1)]}
+
         
 class Board:
 
     def __init__(self) -> None:
         self.player = WHITE
-        self.legalmoves = set()
         self.white_pieces = set({(0,0),(0,1),(0,2),(0,3),(0,4),(0,5),(0,6),(0,7),(0,8),(1,1),(1,7),(2,2),(2,6),(3,3),(3,5)})
         self.black_pieces = set({(8,0),(8,1),(8,2),(8,3),(8,4),(8,5),(8,6),(8,7),(8,8),(7,1),(7,7),(6,2),(6,6),(5,3),(5,5)})
-        np.random.seed(42069)
+        np.random.seed(420)
         self.zobrist = np.random.randint(0, (2**63) -1, size=(BOARD_SIZE, BOARD_SIZE, 2), dtype=np.uint64) 
         self.zobrist_player = np.random.randint(0, (2**63) -1, size=(2), dtype=np.uint64)
         
 
+    def generate_moves_unordered(self, player):
+        moves, capture = [], False
+        current_pieces = self.white_pieces if player == WHITE else self.black_pieces
+        opponent_pieces = self.black_pieces if player == WHITE else self.white_pieces
+        
+        for piece in current_pieces:
+            for capture_offset in CAPTURED_PIECE_OFFSET[player]:
+                captured_piece = add_tuples(piece, capture_offset)
+                new_pos = add_tuples(piece, add_tuples(capture_offset, capture_offset))
+                if 0 <= new_pos[0] < BOARD_SIZE and 0 <= new_pos[1] < BOARD_SIZE and captured_piece in opponent_pieces and  new_pos not in current_pieces and new_pos not in opponent_pieces:
+                    if not capture:
+                        capture = True
+                        moves.clear()
+                    moves.append((*piece, *new_pos))
+
+            if not capture:
+                new_pos = add_tuples(piece, FORWARD_DIRECTIONS[player])
+                if 0 <= new_pos[0] < BOARD_SIZE and new_pos not in current_pieces and new_pos not in opponent_pieces:
+                    moves.append((*piece, *new_pos))
+                for offset in LATERAL_DIRECTIONS:
+                    new_pos = add_tuples(piece, offset)
+                    if 0 <= new_pos[1] < BOARD_SIZE and new_pos not in current_pieces and new_pos not in opponent_pieces:
+                        moves.append((*piece, *new_pos))
+        return moves
+            
 
     def generate_moves(self, player, sorted_moves=False, capture=False, reverse = True):
         if sorted_moves:
@@ -80,20 +102,25 @@ class Board:
         key ^= self.zobrist_player[player - 1]
         return key
 
-    def zobrist_move(self,zobrist,player,move):
-        
-        player = 1 if player == WHITE else 0
-        opponent = 1 - player
-        
-        zobrist ^= self.zobrist_player[opponent]
-        zobrist ^= self.zobrist_player[player]
-        
-        zobrist ^= self.zobrist[move[0], move[1], player]
-        zobrist ^= self.zobrist[move[2], move[3], player]
+    def zobrist_move(self, zobrist, player, move):
+        # Determine the player and opponent indices (0 for black, 1 for white)
+        player_idx = 1 if player == WHITE else 0
+        opponent_idx = 1 - player_idx
 
-        
-        if abs(move[0] - move[2]) == 2:
-            zobrist ^= self.zobrist[(move[0] + move[2]) // 2, (move[1] + move[3]) // 2, opponent]
+        # XOR the current player and opponent hash
+        zobrist ^= self.zobrist_player[opponent_idx]
+        zobrist ^= self.zobrist_player[player_idx]
+
+        # XOR the current and destination positions of the piece
+        zobrist ^= self.zobrist[move[0], move[1], player_idx]
+        zobrist ^= self.zobrist[move[2], move[3], player_idx]
+
+        # Precompute the captured piece's position if it's a capture move (when abs(move[0] - move[2]) == 2)
+        if move[0] - move[2] == 2 or move[0] - move[2] == -2:
+            mid_y = (move[0] + move[2]) // 2
+            mid_x = (move[1] + move[3]) // 2
+            zobrist ^= self.zobrist[mid_y, mid_x, opponent_idx]
+
         return zobrist
 
     def movecheck(self,player, y1,x1,y2,x2):
@@ -109,16 +136,6 @@ class Board:
         for y, x in self.black_pieces:
             np_board[y][x] = "B"
         return "\n".join(" ".join(row) for row in np_board)
-
-    def can_capture(self,player,piece):        
-        if any(move[:2] == piece for move in self.generate_moves(player, capture=True)):    return True
-        return False
-
-    def menace(self,player):
-        opponent_secondlastrow = self.black_pieces.intersection(ROW1) if player == WHITE else self.white_pieces.intersection(ROW7)
-        opponent_thirdlastrow = self.black_pieces.intersection(ROW2) if player == WHITE else self.white_pieces.intersection(ROW6)
-        return len(opponent_secondlastrow) > 0 or len(opponent_thirdlastrow) > 0
-        
     
 def add_tuples(t1, t2):
     return tuple(map(sum, zip(t1, t2)))

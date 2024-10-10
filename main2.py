@@ -10,15 +10,6 @@ BLACK_COLOR = (0, 0, 0)
 GREY = (200, 200, 200)
 
 
-FIANCO_BONUS = 20
-POSITIONAL_BONUS = 20
-SECONDLASTBONUS = 10
-THIRDANDCAPTURE_BONUS = 0
-PIECE_BONUS = 5
-
-
-feature_set = {"FIANCO_BONUS": FIANCO_BONUS, "POSITIONAL_BONUS": POSITIONAL_BONUS, "SECONDLASTBONUS": SECONDLASTBONUS, "THIRDANDCAPTURE_BONUS": THIRDANDCAPTURE_BONUS, "PIECE_BONUS": PIECE_BONUS}
-feature_set1 = {'FIANCO_BONUS': 20, 'POSITIONAL_BONUS': 20, 'SECONDLASTBONUS': 20, 'THIRDANDCAPTURE_BONUS': 0, 'PIECE_BONUS': 10}
 
 
 
@@ -33,8 +24,8 @@ clock = pygame.time.Clock()
 # Initialize game state
 chessboard = Board()
 #engine = Engine(chessboard, 1)
-engine = ImprovedEngine(chessboard, 2, feature_set1,24)
-engine1 = ImprovedEngine(chessboard, 1, feature_set, 24)
+engine = ImprovedEngine(chessboard, 2, transposition_table_size=24)
+engine1 = ImprovedEngine(chessboard, 1, transposition_table_size=24)
 selected_piece = None
 game_over = False
 black_time = []
@@ -55,23 +46,17 @@ def draw_labels():
     player_message = f"Player {chessboard.player}'s turn"
     screen.blit(font.render(player_message, True, BLACK_COLOR), (WIDTH // 2 - FONT_SIZE, HEIGHT - FONT_SIZE - 10))
 
-    global engine
-    valueblack = engine.evaluation_function(WHITE)
+    global engine, engine1
+    valueblack = engine.evaluation_function(BLACK)
     valuewhite= -valueblack
-    values = f"White: {valuewhite} Black: {valueblack}"
+    values = f"Values b/w: {valuewhite}, {valueblack}"
     screen.blit(font.render(values, True, BLACK_COLOR), (WIDTH // 2 - FONT_SIZE, HEIGHT - FONT_SIZE - 40))
 
-    collisions = f"Collisions b/w: {engine.collisions}, {engine.collisions}"
-    hits = f"Hits b/w: {engine.hits}, {engine.hits}"
     nodes = f"Nodes  b/w: {engine.nodes}, {engine.nodes}"
-    movetimes = f"Move times b/w: {round(sum(white_time),2)}, {round(sum(black_time),2)}"
-    evals = f"Evaluations b/w: {engine.evaluation}, {engine.evaluation}"
+    evals = f"Evaluations b/w: {valueblack}, {valuewhite}"
     depth = f"Depth: {engine.depth}"
     
-    screen.blit(font.render(collisions, True, BLACK_COLOR), (WIDTH -500 , HEIGHT - 5 * FONT_SIZE - 70))
-    screen.blit(font.render(hits, True, BLACK_COLOR), (WIDTH -500 , HEIGHT - FONT_SIZE - 70))
     screen.blit(font.render(nodes, True, BLACK_COLOR), (WIDTH - 500 , HEIGHT - 2 * FONT_SIZE - 70))
-    screen.blit(font.render(movetimes, True, BLACK_COLOR), (WIDTH -500 , HEIGHT - 3 * FONT_SIZE - 70))
     screen.blit(font.render(evals, True, BLACK_COLOR), (WIDTH -500 , HEIGHT - 4 * FONT_SIZE - 70))
     screen.blit(font.render(depth, True, BLACK_COLOR), (WIDTH -500 , HEIGHT - 6 * FONT_SIZE - 70))
 
@@ -106,8 +91,8 @@ def reset_game():
     chessboard = Board()
     fs = engine.feature_set
     fs1 = engine1.feature_set
-    engine = ImprovedEngine(chessboard, 2, fs1, 24)
-    engine1 = ImprovedEngine(chessboard, 1, fs, 24)
+    engine = ImprovedEngine(chessboard, 2, 24)
+    engine1 = ImprovedEngine(chessboard, 1, 24)
     selected_piece = None
     game_over = False
     
@@ -159,7 +144,7 @@ def main_game_loop():
 
             elif chessboard.player == 1 and game_over == 0 and pygame.mouse.get_pressed()[0]:
                 start = time.time()
-                move = engine1.negamax_iterative_deepening_root(chessboard, 6, -1000000, 1000000, max_time=3)
+                move = engine1.negamax_iterative_deepening_root(chessboard, 12, -1000000, 1000000, max_time=3)
                 end = time.time()
                 black_time.append(end-start)
                 chessboard.move(chessboard.player, move[0], move[1], move[2], move[3])
@@ -169,9 +154,9 @@ def main_game_loop():
 
                     
 
-            elif chessboard.player == 2 and game_over == 0 :
+            elif chessboard.player == 2 and game_over == 0  and pygame.mouse.get_pressed()[0]:
                 start = time.time()
-                move = engine.negamax_iterative_deepening_root(chessboard, 6, -1000000, 1000000, max_time=3)
+                move = engine.negamax_iterative_deepening_root(chessboard, 12, -1000000, 1000000, max_time=3)
                 end = time.time()
                 white_time.append(end-start)
                 chessboard.move(chessboard.player, move[0], move[1], move[2], move[3])
