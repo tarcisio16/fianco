@@ -1,9 +1,6 @@
 import numpy as np
 from parameters import *
-from collections import deque
 
-
-        
 class Board:
 
     def __init__(self) -> None:
@@ -11,8 +8,8 @@ class Board:
         self.white_pieces = set({(0,0),(0,1),(0,2),(0,3),(0,4),(0,5),(0,6),(0,7),(0,8),(1,1),(1,7),(2,2),(2,6),(3,3),(3,5)})
         self.black_pieces = set({(8,0),(8,1),(8,2),(8,3),(8,4),(8,5),(8,6),(8,7),(8,8),(7,1),(7,7),(6,2),(6,6),(5,3),(5,5)})
         np.random.seed(420)
-        self.zobrist = np.random.randint(0, (2**63) -1, size=(BOARD_SIZE, BOARD_SIZE, 2), dtype=np.uint64) 
-        self.zobrist_player = np.random.randint(0, (2**63) -1, size=(2), dtype=np.uint64)
+        self.zobrist = ZOBRIST_ARRAY
+        self.zobrist_player = ZOBRIST_PLAYER
         
 
     def generate_moves_unordered(self, player):
@@ -103,31 +100,25 @@ class Board:
         return key
 
     def zobrist_move(self, zobrist, player, move):
-        # Determine the player and opponent indices (0 for black, 1 for white)
         player_idx = 1 if player == WHITE else 0
         opponent_idx = 1 - player_idx
-
-        # XOR the current player and opponent hash
         zobrist ^= self.zobrist_player[opponent_idx]
         zobrist ^= self.zobrist_player[player_idx]
-
-        # XOR the current and destination positions of the piece
         zobrist ^= self.zobrist[move[0], move[1], player_idx]
         zobrist ^= self.zobrist[move[2], move[3], player_idx]
-
-        # Precompute the captured piece's position if it's a capture move (when abs(move[0] - move[2]) == 2)
         if move[0] - move[2] == 2 or move[0] - move[2] == -2:
             mid_y = (move[0] + move[2]) // 2
             mid_x = (move[1] + move[3]) // 2
             zobrist ^= self.zobrist[mid_y, mid_x, opponent_idx]
-
         return zobrist
 
     def movecheck(self,player, y1,x1,y2,x2):
         move = (y1,x1,y2,x2)
-        if move in list(self.generate_moves(self.player)):
+        if move in self.generate_moves_unordered(self.player):
             self.move(player,y1,x1,y2,x2)
             self.player ^= 3
+            return True
+        return False
 
     def __repr__(self) -> str:
         np_board = [["-" for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)]

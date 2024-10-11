@@ -71,7 +71,7 @@ def draw_pieces():
                            CELL_SIZE // 2 - 10)
 
 def draw_moves():
-    legal_moves = list(chessboard.generate_moves(chessboard.player))
+    legal_moves = chessboard.generate_moves_unordered(chessboard.player)
     if selected_piece:
         pygame.draw.circle(screen, (255, 0, 0), 
                            (selected_piece[1] * CELL_SIZE + MARGIN + CELL_SIZE // 2, selected_piece[0] * CELL_SIZE + MARGIN + CELL_SIZE // 2), 

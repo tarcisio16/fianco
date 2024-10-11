@@ -2,21 +2,21 @@ import numpy as np
 from board import Board
 from parameters import *
 import time
+import sys
 
-class TTengine():
+class Engine():
     
-    def __init__(self, board, player,feature_set, transposition_table_size = 26) -> None:
+    def __init__(self, board, player,feature_set, transposition_table_size = 28) -> None:
         self.board = board
         self.player = player
         self.player_at_turn = player
         self.tt = np.zeros((2 ** transposition_table_size, 2), dtype=np.uint64)  # 64-bit entry: |depth (4)|flag (3)|sign (1)|value (40)|move (16)|
-        self.hits = self.turn = self.nodes = self.depth = self.turn = 0
+        self.nodes = self.depth = 0
         self.mask = (1 << transposition_table_size) - 1 
         self.fiancobonus = feature_set["FIANCO_BONUS"]
         self.positionalbonus = feature_set["POSITIONAL_BONUS"]
         self.secondlastbonus = feature_set["SECONDLASTBONUS"]
         self.thirdbonus = feature_set["THIRDBONUS"]
-        self.piecebonus = feature_set["PIECE_BONUS"]
         self.feature_set = feature_set
         
 
@@ -35,11 +35,6 @@ class TTengine():
         index = int(zobrist) & self.mask
         self.tt[index] = [np.uint64(zobrist), np.uint64(packed)]
 
-    def next_turn(self):
-        self.turn += 1
-        self.hits = self.nodes = 0
-
-
     def move_negamax(self,player,move, alpha, beta, depth, zobrist):
         self.board.move(player,*move)
         self.player_at_turn  ^= 3
@@ -54,7 +49,6 @@ class TTengine():
     def evaluation_function(self, player):
         positional_bonus = self.positionalbonus
         fianco_bonus = self.fiancobonus
-        piece_bonus = self.piecebonus
         second_last_bonus = self.secondlastbonus
         board_size = BOARD_SIZE
 
@@ -88,4 +82,3 @@ class TTengine():
 
 def getvalue(ttvalue_packed):
     return -((ttvalue_packed >> 16) & 0xFFFFFFFFFF) if (ttvalue_packed >> 56) & 0x1 else (ttvalue_packed >> 16) & 0xFFFFFFFFFF
-

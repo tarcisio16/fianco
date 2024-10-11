@@ -1,18 +1,10 @@
 from parameters import *
 from board import Board
-from enginewithtt import TTengine as Engine
+from enginewithtt import Engine 
 from enginewithtt import getvalue
 import time 
 from collections import defaultdict
-import pprint
 
-feature_set1 = {"FIANCO_BONUS": 1,
-                "POSITIONAL_BONUS": 2,
-                "SECONDLASTBONUS": 10,
-                "THIRDBONUS": 5,
-                 "PIECE_BONUS": 0}
-
-CACHELIMIT = 5000
 class QuiescentEngine(Engine):
 
     def __init__(self,board,player,feature_set = feature_set1,  transposition_table_size = 26) -> None:
@@ -20,6 +12,8 @@ class QuiescentEngine(Engine):
         self.bestmoves = []
         self.null = False
         self.history_heuristic = defaultdict(int)
+        self.ordered_moves_opponent = None
+        self.turn = 0
         
 
     def negamax(self, depth, alpha, beta, zobrist):
@@ -42,7 +36,7 @@ class QuiescentEngine(Engine):
 
 
         if depth == 0:
-            return self.quiescent_search(alpha, beta,zobrist = zobrist) 
+            return self.quiescent_search(alpha, beta,zobrist = zobrist ) 
 
         if ttvalue_packed is not None and tt_depth >= 0:
             
@@ -77,27 +71,26 @@ class QuiescentEngine(Engine):
         return best_value
 
     def order_moves(self, moves):
+        if self.turn < 5:
+            intersecting_items = [item for item in moves if item in OPENING_BOOK_BLACK]
+            non_intersecting_items = [item for item in moves if item not in OPENING_BOOK_BLACK]
+            return intersecting_items + non_intersecting_items
         return sorted(moves, key = lambda x: self.history_heuristic[x], reverse = True)
     
     def negamax_iterative_deepening_root(self, board, max_depth, alpha = -1000000, beta= 1000000,max_time = 8, window = 1):
-
-        # next turn
-        self.next_turn()
+        self.turn += 1
+        self.player_at_turn, self.nodes = self.player , 0
         initial_a, initial_b, best_move, zobrist, start = alpha, beta, None, board.zobrist_hash(self.player), time.time()
 
-        
-        # if menace is true, sort moves in ascending order
-        generated_moves = self.order_moves(list(board.generate_moves(self.player)))
+        # generate moves
+        generated_moves = self.order_moves(board.generate_moves_unordered(self.player))
         moves = {value: alpha  for value in generated_moves}
- 
 
         # if only one move, return it
         if len(moves) == 1: return list(moves.keys())[0]
 
         # iterate through depths
         for depth in range(1, max_depth):
-
-            fail_high, fail_low = 0, 0
             if self.timeup(start, max_time): break
             
             current_best_move, best_value, alpha, beta = None, initial_a, initial_a, initial_b
@@ -110,12 +103,8 @@ class QuiescentEngine(Engine):
                 if depth > 1 and i > 0:
                     previous_value = moves[move]
                     value = self.move_negamax(self.player,move, previous_value - window, previous_value + window, depth, zobrist)
-                    if value >= beta:
-                        fail_high += 1
-                        value = self.move_negamax(self.player,move, value, initial_b, depth, zobrist)
-                    elif value <= alpha:
-                        fail_low += 1
-                        value = self.move_negamax(self.player,move, initial_a, value, depth, zobrist)
+                    if value >= beta:       value = self.move_negamax(self.player,move, value, initial_b, depth, zobrist)
+                    elif value <= alpha:    value = self.move_negamax(self.player,move, initial_a, value, depth, zobrist)
                 moves[move] = value
                 if value > best_value:
                     best_value, current_best_move = value, move

@@ -1,4 +1,4 @@
-
+import numpy as np
 
 BOARD_SIZE = 9
 BLACK= 2
@@ -42,3 +42,14 @@ UPPERBOUND = 2
 LATERAL_DIRECTIONS = {(0, -1), (0, 1)}
 FORWARD_DIRECTIONS = {WHITE: (1, 0), BLACK: (-1, 0)}
 CAPTURED_PIECE_OFFSET = {WHITE: [(1, 1), (1, -1)], BLACK: [(-1, 1), (-1, -1)]}
+
+feature_set1 = {"FIANCO_BONUS": 1,
+                "POSITIONAL_BONUS": 2,
+                "SECONDLASTBONUS": 10,
+                "THIRDBONUS": 5}
+
+np.random.seed(420)
+ZOBRIST_ARRAY = np.random.randint(0, (2**63) -1, size=(BOARD_SIZE, BOARD_SIZE, 2), dtype=np.uint64)
+ZOBRIST_PLAYER = np.random.randint(0, (2**63) -1, size=(2), dtype=np.uint64)
+
+OPENING_BOOK_BLACK = [[8,0,7,0],[6,6,5,6],[8,4,7,4],[8,8,7,8],[6,2,4,0],[7,8,5,6],[4,3,2,5],[8,6,7,6], [5,5,3,7]]
