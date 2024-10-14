@@ -35,10 +35,10 @@ class Engine():
         index = int(zobrist) & self.mask
         self.tt[index] = [np.uint64(zobrist), np.uint64(packed)]
 
-    def move_negamax(self,player,move, alpha, beta, depth, zobrist):
+    def move_negamax(self,player,move, alpha, beta, depth, zobrist, ply):
         self.board.move(player,*move)
         self.player_at_turn  ^= 3
-        value = -self.negamax(depth - 1, -beta, -alpha, self.board.zobrist_move(zobrist, self.player_at_turn, move))
+        value = -self.negamax(depth - 1, -beta, -alpha, self.board.zobrist_move(zobrist, self.player_at_turn, move), ply+1)
         self.player_at_turn = player
         self.board.undomove(player,*move)
         return value
@@ -61,6 +61,8 @@ class Engine():
                         positional_score += second_last_bonus
                     if y == 6:
                         positional_score += self.thirdbonus
+                    if y >= 5 and self.board.second_last_but_win(WHITE, y, x):
+                        positional_score += 1000
                 else:
                     positional_score = (board_size - y) * positional_bonus
                     if y == 1:

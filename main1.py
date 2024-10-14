@@ -14,7 +14,6 @@ BLACK_COLOR = (0, 0, 0)
 GREY = (200, 200, 200)
 RED_COLOR = (255, 0, 0)
 
-# Initialize pygame and screen dimensions
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("FIANCO")
@@ -24,7 +23,6 @@ clock = pygame.time.Clock()
 
 
 PLAYER = BLACK
-# Initialize game state
 chessboard = Board()
 engine = ImprovedEngine(chessboard, PLAYER, transposition_table_size=28)
 selected_piece = None
@@ -77,9 +75,9 @@ def show_last_moves():
 
 
 def get_cell_name(row, col):
-    # Convert 0-indexed row/col to board coordinates (like 'a9', 'b8', etc.)
-    column_letter = chr(ord('a') + col)  # Converts 0 to 'a', 1 to 'b', ..., 8 to 'i'
-    row_number = 9 - row  # Converts 0 to 9, 1 to 8, ..., 8 to 1
+ 
+    column_letter = chr(ord('a') + col)
+    row_number = 9 - row  
     return f"{column_letter}{row_number}"
 
 def draw_labels():
@@ -148,7 +146,7 @@ def move_piece(from_pos, to_pos):
 def handle_input():
     keys = pygame.key.get_pressed()
     
-    if keys[pygame.K_BACKSPACE]:  # Restart the game on Backspace
+    if keys[pygame.K_BACKSPACE]: 
         reset_game()
         return
 
@@ -202,7 +200,7 @@ def main_game_loop():
                     backgroundsearch.join()
                 start = time.time()
                 engine.board = chessboard
-                move = engine.negamax_iterative_deepening_root(chessboard, 12, max_time=30)
+                move = engine.negamax_iterative_deepening_root(chessboard, 12, max_time=5)
                 end = time.time()
                 total_nodes_visited = engine.nodes
                 depth = engine.depth
@@ -213,12 +211,8 @@ def main_game_loop():
                     engine.board = deepcopy(chessboard)
                     engine.threadkill = False
                     engine.nodes = 0
-                    backgroundsearch = threading.Thread(target=engine.negamax_background_id, args=(engine.board, 13, 3- engine.player)) 
+                    backgroundsearch = threading.Thread(target=engine.negamax_background_id, args=(engine.board, 10, 3- engine.player)) 
                     backgroundsearch.start()
-                    turn += 1
-                    if turn < 10:
-                        path = f"./opening_book_moves/move{turn}.json"
-                        defaultdict_in_json(engine.history_heuristic, path)
                 except Exception as e:
                     print(e)
                     pygame.quit()

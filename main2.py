@@ -13,19 +13,16 @@ GREY = (200, 200, 200)
 
 
 
-# Initialize pygame and screen dimensions
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("FIANCO")
 font = pygame.font.SysFont(None, FONT_SIZE)
 font2 = pygame.font.SysFont(None, FONT_SIZE // 2)
 clock = pygame.time.Clock()
-
-# Initialize game state
 chessboard = Board()
-#engine = Engine(chessboard, 1)
 engine = ImprovedEngine(chessboard, 2, transposition_table_size=24)
 engine1 = ImprovedEngine(chessboard, 1, transposition_table_size=24)
+engine1.fiancobonus = 3
 selected_piece = None
 game_over = False
 black_time = []
@@ -106,7 +103,7 @@ def move_piece(from_pos, to_pos):
 def handle_input():
     keys = pygame.key.get_pressed()
     
-    if keys[pygame.K_BACKSPACE]:  # Restart the game on Backspace
+    if keys[pygame.K_BACKSPACE]: 
         reset_game()
         return
 

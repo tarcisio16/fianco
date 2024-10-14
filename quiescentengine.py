@@ -3,7 +3,7 @@ from board import Board
 from enginewithtt import Engine 
 from enginewithtt import getvalue
 import time 
-from collections import defaultdict
+from collections import defaultdict, deque
 
 class QuiescentEngine(Engine):
 
@@ -12,11 +12,11 @@ class QuiescentEngine(Engine):
         self.bestmoves = []
         self.null = False
         self.history_heuristic = defaultdict(int)
-        self.ordered_moves_opponent = None
         self.turn = 0
+        self.killer_moves = [None for _ in range(20)]
         
 
-    def negamax(self, depth, alpha, beta, zobrist):
+    def negamax(self, depth, alpha, beta, zobrist,ply):
         ttmove, olda, ttvalue_packed, self.nodes = None, alpha, self.retrieve_tt(zobrist), self.nodes + 1
             
         if ttvalue_packed is not None:
@@ -38,44 +38,52 @@ class QuiescentEngine(Engine):
         if depth == 0:
             return self.quiescent_search(alpha, beta,zobrist = zobrist ) 
 
-        if ttvalue_packed is not None and tt_depth >= 0:
+        if ttvalue_packed is not None and tt_depth > 0:
             
             ttmove = (ttvalue_packed >> 12) & 0xF, (ttvalue_packed >> 8) & 0xF, (ttvalue_packed >> 4) & 0XF, ttvalue_packed & 0xF
-            if tt_depth > 0:
-                best_value, bestmove = self.move_negamax(self.player_at_turn,ttmove, alpha, beta, depth, zobrist), ttmove
-                alpha = max(alpha, best_value)
-                if best_value >= beta:
-                    self.history_heuristic[ttmove] += 1
-                    self.store_tt(zobrist, depth, best_value, bestmove, olda, beta)
-                    return best_value
-            else:
-                best_value = getvalue(ttvalue_packed)
+            best_value, bestmove = self.move_negamax(self.player_at_turn,ttmove, alpha, beta, depth, zobrist, ply), ttmove
+            alpha = max(alpha, best_value)
+            if best_value >= beta:
+                
+                self.history_heuristic[ttmove] = max(self.history_heuristic[ttmove], best_value)
+                self.killer_moves[ply] = ttmove
+                self.store_tt(zobrist, depth, best_value, bestmove, olda, beta)
+                return best_value
             
 
         best_value = -1000000
-        moves = self.order_moves(list(self.board.generate_moves_unordered(self.player_at_turn)))
+        moves = self.order_moves(list(self.board.generate_moves_unordered(self.player_at_turn)),ply)
         
         for move in moves:
             if abs(move[0] - move[2]) == 2:
-                value = self.move_negamax(self.player_at_turn,move, alpha, beta, depth +1, zobrist)
+                value = self.move_negamax(self.player_at_turn,move, alpha, beta, depth +1, zobrist,ply)
             else:
-                value = self.move_negamax(self.player_at_turn,move, alpha, beta, depth, zobrist)
+                value = self.move_negamax(self.player_at_turn,move, alpha, beta, depth, zobrist,ply)
             if value > best_value:
                 best_value, bestmove = value, move
             alpha = max(alpha, best_value)
             if best_value >= beta:
-                self.history_heuristic[move] += 1
+                self.history_heuristic[ttmove] = max(self.history_heuristic[ttmove], best_value)
+                self.killer_moves[ply] = bestmove
                 self.store_tt(zobrist, depth, best_value, bestmove, olda, beta)
                 break
-        self.history_heuristic[bestmove] += 1
+        self.history_heuristic[ttmove] = max(self.history_heuristic[ttmove], best_value)
         return best_value
 
-    def order_moves(self, moves):
+    def order_moves(self, moves, ply):
+
         if self.turn < 5:
-            intersecting_items = [item for item in moves if item in OPENING_BOOK_BLACK]
-            non_intersecting_items = [item for item in moves if item not in OPENING_BOOK_BLACK]
-            return intersecting_items + non_intersecting_items
-        return sorted(moves, key = lambda x: self.history_heuristic[x], reverse = True)
+            book_moves = [move for move in moves if move in OPENING_BOOK_BLACK]
+            non_book_moves = [move for move in moves if move not in OPENING_BOOK_BLACK]
+            moves = book_moves + non_book_moves
+            return moves
+        moves = sorted(moves, key=lambda x: self.history_heuristic[x], reverse=True)
+        if  ply < len(self.killer_moves):
+            killer_move = self.killer_moves[ply]
+            if killer_move is not None and killer_move in moves:
+                moves = [killer_move] + [move for move in moves if move != killer_move]
+        
+        return moves
     
     def negamax_iterative_deepening_root(self, board, max_depth, alpha = -1000000, beta= 1000000,max_time = 8, window = 1):
         self.turn += 1
@@ -83,11 +91,13 @@ class QuiescentEngine(Engine):
         initial_a, initial_b, best_move, zobrist, start = alpha, beta, None, board.zobrist_hash(self.player), time.time()
 
         # generate moves
-        generated_moves = self.order_moves(board.generate_moves_unordered(self.player))
+        generated_moves = self.order_moves(board.generate_moves_unordered(self.player),0)
         moves = {value: alpha  for value in generated_moves}
 
         # if only one move, return it
         if len(moves) == 1: return list(moves.keys())[0]
+
+        
 
         # iterate through depths
         for depth in range(1, max_depth):
@@ -99,18 +109,19 @@ class QuiescentEngine(Engine):
             
             for move, i in zip(current_moves, range(len(current_moves))):
                 if i == 0 or depth == 1:
-                    value = self.move_negamax(self.player,move, alpha, beta, depth, zobrist)
+                    value = self.move_negamax(self.player,move, alpha, beta, depth, zobrist,0)
                 if depth > 1 and i > 0:
                     previous_value = moves[move]
-                    value = self.move_negamax(self.player,move, previous_value - window, previous_value + window, depth, zobrist)
-                    if value >= beta:       value = self.move_negamax(self.player,move, value, initial_b, depth, zobrist)
-                    elif value <= alpha:    value = self.move_negamax(self.player,move, initial_a, value, depth, zobrist)
+                    value = self.move_negamax(self.player,move, previous_value - window, previous_value + window, depth, zobrist,0)
+                    if value >= beta:       value = self.move_negamax(self.player,move, value, initial_b, depth, zobrist,0)
+                    elif value <= alpha:    value = self.move_negamax(self.player,move, initial_a, value, depth, zobrist,0)
                 moves[move] = value
                 if value > best_value:
                     best_value, current_best_move = value, move
                 alpha = max(alpha, best_value)
                 if best_value >= beta:  
                     best_move = current_best_move
+                    self.killer_moves[0] = best_move
                     break
                 if i % 2 == 0 and self.timeup(start, max_time):
                     break
@@ -147,7 +158,6 @@ class QuiescentEngine(Engine):
             self.board.undomove(self.player_at_turn,*move)
             score = max(score, value)
             if value >= beta:
-                self.history_heuristic[move] += 1
                 return beta
             alpha = max(alpha, value)
         return score

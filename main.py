@@ -11,7 +11,6 @@ BLACK_COLOR = (0, 0, 0)
 GREY = (200, 200, 200)
 RED_COLOR = (255, 0, 0)
 
-# Initialize pygame and screen dimensions
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("FIANCO")
@@ -20,7 +19,6 @@ font2 = pygame.font.SysFont(None, FONT_SIZE // 2)
 clock = pygame.time.Clock()
 
 PLAYER = BLACK
-# Initialize game state
 chessboard = Board()
 engine = ImprovedEngine(chessboard, PLAYER, transposition_table_size=28)
 selected_piece = None
@@ -34,26 +32,21 @@ total_hits = 0
 
 
 def draw_grid():
-    # Draw the grid lines
     for x in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):
         pygame.draw.line(screen, BLACK_COLOR, (x, MARGIN), (x, MARGIN + BOARD_SIZE * CELL_SIZE), 2)
     for y in range(MARGIN, MARGIN + BOARD_SIZE * CELL_SIZE + 1, CELL_SIZE):
         pygame.draw.line(screen, BLACK_COLOR, (MARGIN, y), (MARGIN + BOARD_SIZE * CELL_SIZE, y), 2)
-
-    # Draw cell labels (like 'a9', 'b8', etc.)
     for row in range(BOARD_SIZE):
         for col in range(BOARD_SIZE):
             cell_name = get_cell_name(row, col)
-            # Render the cell name on the board
-            text = font.render(cell_name, True, BLACK_COLOR)  # Render the text
+            text = font.render(cell_name, True, BLACK_COLOR)  #
             text_rect = text.get_rect(center=(MARGIN + col * CELL_SIZE + CELL_SIZE // 2, 
-                                                MARGIN + row * CELL_SIZE + CELL_SIZE // 2))  # Center the text in the cell
-            screen.blit(text, text_rect)  # Draw the text on the screen
+                                                MARGIN + row * CELL_SIZE + CELL_SIZE // 2)) 
+            screen.blit(text, text_rect)  
 
 def get_cell_name(row, col):
-    # Convert 0-indexed row/col to board coordinates (like 'a9', 'b8', etc.)
-    column_letter = chr(ord('a') + col)  # Converts 0 to 'a', 1 to 'b', ..., 8 to 'i'
-    row_number = 9 - row  # Converts 0 to 9, 1 to 8, ..., 8 to 1
+    column_letter = chr(ord('a') + col)  
+    row_number = 9 - row  
     return f"{column_letter}{row_number}"
 def draw_labels():
     for i in range(BOARD_SIZE):
@@ -130,7 +123,7 @@ def move_piece(from_pos, to_pos):
 def handle_input():
     keys = pygame.key.get_pressed()
     
-    if keys[pygame.K_BACKSPACE]:  # Restart the game on Backspace
+    if keys[pygame.K_BACKSPACE]:  
         reset_game()
         return
 

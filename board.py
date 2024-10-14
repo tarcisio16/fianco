@@ -25,16 +25,16 @@ class Board:
                     if not capture:
                         capture = True
                         moves.clear()
-                    moves.append((*piece, *new_pos))
+                    moves.append(tuple((*piece, *new_pos)))
 
             if not capture:
                 new_pos = add_tuples(piece, FORWARD_DIRECTIONS[player])
                 if 0 <= new_pos[0] < BOARD_SIZE and new_pos not in current_pieces and new_pos not in opponent_pieces:
-                    moves.append((*piece, *new_pos))
+                    moves.append(tuple((*piece, *new_pos)))
                 for offset in LATERAL_DIRECTIONS:
                     new_pos = add_tuples(piece, offset)
                     if 0 <= new_pos[1] < BOARD_SIZE and new_pos not in current_pieces and new_pos not in opponent_pieces:
-                        moves.append((*piece, *new_pos))
+                        moves.append(tuple((*piece, *new_pos)))
         return moves
             
 
@@ -51,17 +51,17 @@ class Board:
                 new_pos = add_tuples(piece, add_tuples(capture_offset, capture_offset))
                 if 0 <= new_pos[0] < BOARD_SIZE and 0 <= new_pos[1] < BOARD_SIZE and captured_piece in opponent_pieces and  new_pos not in current_pieces and new_pos not in opponent_pieces:
                     capture = True
-                    yield (*piece, *new_pos)
+                    yield tuple((*piece, *new_pos))
 
         if not capture:
             for piece in current_pieces:
                 new_pos = add_tuples(piece, FORWARD_DIRECTIONS[player])
                 if 0 <= new_pos[0] < BOARD_SIZE and new_pos not in current_pieces and new_pos not in opponent_pieces:
-                    yield (*piece, *new_pos)
+                    yield tuple((*piece, *new_pos))
                 for offset in LATERAL_DIRECTIONS:
                     new_pos = add_tuples(piece, offset)
                     if 0 <= new_pos[1] < BOARD_SIZE and new_pos not in current_pieces and new_pos not in opponent_pieces:
-                        yield (*piece, *new_pos)
+                        yield tuple((*piece, *new_pos))
 
     def move(self,player, y1, x1, y2, x2):
         pieces = self.white_pieces if player == WHITE else self.black_pieces
@@ -72,6 +72,36 @@ class Board:
         if abs(y1 - y2) == 2:
             opponent_pieces.remove((((y1 + y2) // 2, (x1 + x2) // 2)))
 
+    def second_last_but_win(self, player, y, x):
+        row = 8 if player == WHITE else 0
+        row1 = 7 if player == WHITE else 1
+        row2 = 6 if player == WHITE else 2
+
+        freecells = set()
+
+        if (y == 5 and player == WHITE) or (y == 3 and player == BLACK):
+            freecells.update({
+                (row, x), (row, x + 1), (row, x - 1),
+                (row1, x), (row1, x + 1), (row1, x - 1),
+                (row, x + 2), (row, x - 2),
+                (row1, x + 2), (row1, x - 2),
+                (row, x + 3), (row, x - 3),
+                (row2, x), (row2, x + 1), (row2, x - 1)
+            })
+        elif (y == 6 and player == WHITE) or (y == 2 and player == BLACK):
+            freecells.update({
+                (row, x), (row, x + 1), (row, x - 1),
+                (row1, x), (row1, x + 1), (row1, x - 1),
+                (row, x + 2), (row, x - 2)
+            })
+        elif (y == 7 and player == WHITE) or (y == 1 and player == BLACK):
+            freecells.update({
+                (row, x), (row, x + 1), (row, x - 1)
+            })
+
+        emptycells = ALL_CELLS - self.white_pieces - self.black_pieces
+        return emptycells >= freecells
+
 
     def undomove(self,player, y1, x1, y2, x2):
         pieces = self.white_pieces if player == WHITE else self.black_pieces
@@ -81,7 +111,8 @@ class Board:
         if abs(y1 - y2) == 2:
             captured = ((y1 + y2) // 2, (x1 + x2) // 2)
             opponent_pieces.add(captured)
-                
+
+
     def checkwin(self):
         if self.white_pieces.intersection(WINNING_WHITES):
             return 1
